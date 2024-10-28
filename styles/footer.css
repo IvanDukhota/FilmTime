@@ -1,0 +1,98 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@200;400;500;700;800&display=swap');
+
+* {
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.page_footer {
+    background-color: #171717;
+    height: 200px;
+    width: 100%;
+    z-index: 3;
+    margin-top: 65px;
+    text-align: left;
+    display: grid;
+    padding: 0;
+    grid-template-rows: [separator_line] 35px [main_content] 24px [end];
+    grid-template-columns: [watch] 27% [app] 23% [help_center] 23% [follow_us] auto [end];
+    color: #f5f5f5;
+}
+
+.separator_line_div {
+    grid-column-start: watch;
+    grid-column-end: end;
+    grid-row: separator_line;
+    display: flex;
+}
+
+.separator_line {
+    height: 1px;
+    background-color: #79747E;
+    width: 100%;
+}
+
+.watch_div {
+    grid-row: main_content;
+    grid-column: watch;
+    margin-left: 108px;
+}
+
+.watch_content_div {
+    display: flex;
+    flex-direction: column;
+}
+
+.app_div {
+    grid-row: main_content;
+    grid-column: app;
+}
+
+.app_content_div {
+    display: flex;
+    flex-direction: column;
+}
+
+.help_center_div {
+    grid-row: main_content;
+    grid-column: help_center;
+}
+
+.help_center_content_div {
+    display: flex;
+    flex-direction: column;
+}
+
+.follow_us_div {
+    grid-row: main_content;
+    grid-column: follow_us;
+    margin-right: 108px;
+}
+
+.follow_us_content_div {
+    display: flex;
+    flex-direction: row;
+}
+
+.img_social {
+    width: 40px;
+    height: 40px;
+    margin-right: 20px;
+    margin-top: 14px;
+}
+
+.header h2 {
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+    font-size: 24px;
+}
+
+.link_hidden_footer {
+    margin-top: 14px;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 200;
+    font-size: 20px;
+    color: #f5f5f5;
+    text-decoration: none;
+}
