@@ -61,18 +61,18 @@
                     errorMessages.forEach(error => error.remove());
                 }
 
-                function addError(fieldWrapper, message) {
+                function addError(inputField, message) {
                     const errorItem = document.createElement('p');
                     errorItem.classList.add('error_message');
                     errorItem.innerText = message;
-                    fieldWrapper.appendChild(errorItem);
+                    inputField.parentNode.appendChild(errorItem);
                 }
 
                 nicknameField.addEventListener('input', function() {
                     const fieldWrapper = nicknameField.closest('.field_wrapper');
                     clearErrors(fieldWrapper);
                     if (nicknameField.value.length < 4 || nicknameField.value.length > 32) {
-                        addError(fieldWrapper, 'Nickname must be between 4 and 32 characters.')
+                        addError(nicknameField, 'Nickname must be between 4 and 32 characters.');
                     }
                 });
 
@@ -81,10 +81,10 @@
                     clearErrors(fieldWrapper);
                     const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
                     if (emailField.value.length < 4 || emailField.value.length > 32) {
-                        addError(fieldWrapper, 'Email address must be between 4 and 32 characters.')
+                        addError(emailField, 'Email address must be between 4 and 32 characters.');
                     }
                     else if (!emailPattern.test(emailField.value)) {
-                        addError(fieldWrapper, 'Please enter a valid email address.')
+                        addError(emailField, 'Please enter a valid email address.');
                     }
                 });
 
@@ -92,7 +92,7 @@
                     const fieldWrapper = passwordField.closest('.field_wrapper');
                     clearErrors(fieldWrapper);
                     if(passwordField.value.length < 8 || passwordField.value.length > 32) {
-                        addError(fieldWrapper, 'Password must be between 8 and 32 characters.');
+                        addError(passwordField, 'Password must be between 8 and 32 characters.');
                     }
                 });
 
@@ -100,7 +100,48 @@
                     const fieldWrapper = repeatPasswordField.closest('.field_wrapper');
                     clearErrors(fieldWrapper);
                     if (repeatPasswordField.value !== passwordField.value) {
-                        addError(fieldWrapper, 'Passwords do not match.');
+                        addError(repeatPasswordField, 'Passwords do not match.');
+                    }
+                });
+
+                document.getElementById('signUpForm').addEventListener('submit', function(event) {
+                    let isValid = true;
+
+                    const nicknameFieldWrapper = nicknameField.closest('.field_wrapper');
+                    clearErrors(nicknameFieldWrapper);
+                    if (nicknameField.value.length < 4 || nicknameField.value.length > 32) {
+                        addError(nicknameField, 'Nickname must be between 4 and 32 characters.');
+                        isValid = false;
+                    }
+
+                    const emailFieldWrapper = emailField.closest('.field_wrapper');
+                    clearErrors(emailFieldWrapper);
+                    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                    if (emailField.value.length < 4 || emailField.value.length > 32) {
+                        addError(emailField, 'Email address must be between 4 and 32 characters.');
+                        isValid = false;
+                    }
+                    else if (!emailPattern.test(emailField.value)) {
+                        addError(emailField, 'Please enter a valid email address.');
+                        isValid = false;
+                    }
+
+                    const passwordFieldWrapper = passwordField.closest('.field_wrapper');
+                    clearErrors(passwordFieldWrapper);
+                    if(passwordField.value.length < 8 || passwordField.value.length > 32) {
+                        addError(passwordField, 'Password must be between 8 and 32 characters.');
+                        isValid = false;
+                    }
+
+                    const repeatPasswordFieldWrapper = repeatPasswordField.closest('.field_wrapper');
+                    clearErrors(repeatPasswordFieldWrapper);
+                    if (repeatPasswordField.value !== passwordField.value) {
+                        addError(repeatPasswordField, 'Passwords do not match.');
+                        isValid = false;
+                    }
+
+                    if (!isValid) {
+                        event.preventDefault();
                     }
                 });
             });
