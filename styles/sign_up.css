@@ -1,0 +1,151 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@200;400;500;700;800&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Roboto', sans-serif;
+    background-color: #171717;
+    color: #f5f5f5;
+}
+
+.container {
+    position: relative;
+    max-width: 648px;
+    width: 100%;
+    text-align: center;
+}
+
+.top_img {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.top_img img {
+    width: 422px;
+    height: 183px;
+}
+
+.form_container {
+    background-color: #182029;
+    padding: 24px 82px 24px;
+    border-radius: 16px;
+    margin-top: 182px;
+}
+
+h1 {
+    font-size: 64px;
+    margin-bottom: 18px;
+    font-weight: bold;
+}
+
+.field_wrapper {
+    position: relative;
+    margin-top: 24px;
+}
+
+.input_field {
+    width: 100%;
+    height: 56px;
+    padding: 8px 16px 8px;
+    border: 1px solid #79747E;
+    border-radius: 4px;
+    background-color: #182029;
+    color: #f5f5f5;
+    font-size: 20px;
+    font-weight: 400;
+    outline: none;
+}
+
+.label_text {
+    position: absolute;
+    top: -10px;
+    left: 10px;
+    background-color: #182029;
+    padding: 0 5px;
+    color: #f5f5f5;
+    font-size: 16px;
+    transition: 0.3s;
+    pointer-events: none;
+}
+
+.sign_up_button {
+    width: 100%;
+    height: 56px;
+    padding: 12px;
+    margin-top: 20px;
+    border: none;
+    border-radius: 16px;
+    background-color: #AAB1BB;
+    color: #232323;
+    font-size: 24px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.sign_up_button:hover, .sign_up_button:active {
+    background-color: #8F959D;
+    color: #464646;
+    border-color: #8F959D;
+}
+
+.social_buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.social_button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48%;
+    height: 56px;
+    padding: 10px;
+    border: 3px solid #f5f5f5;
+    border-radius: 16px;
+    text-decoration: none;
+    color: #f5f5f5;
+    font-size: 24px;
+}
+
+.social_button img {
+    width: 24px;
+    height: 24px;
+    margin-right: 12px;
+}
+
+.social_button:hover, .social_button:active {
+    background-color: #2A3745;
+    color: #f5f5f5;
+    border-color: #2A3745;
+}
+
+.footer_text {
+    margin-top: 20px;
+    font-size: 18px;
+    color: #f5f5f5;
+}
+
+.footer_text a {
+    color: #4278C5;
+    text-decoration: none;
+}
+
+.footer_text a:hover {
+    text-decoration: underline;
+}
+
+.error_message {
+    color: #FF4C4C;
+    font-size: 14px;
+    margin-top: 4px;
+}
