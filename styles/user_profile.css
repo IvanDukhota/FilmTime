@@ -1,0 +1,179 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@200;400;500;700;800&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #171717;
+    color: #f5f5f5;
+}
+
+.profile_section {
+    display: flex;
+    justify-content: center;
+    margin-top: 50px;
+    margin-bottom: 39px;
+}
+
+.profile_card {
+    background-color: #182029;
+    padding: 20px;
+    width: 816px;
+    height: 218px;
+    border-radius: 16px;
+    display: grid;
+    grid-template-columns: [user_icon] 27% [info] 43% [button] auto [end];
+}
+
+.profile_info {
+    grid-column: info;
+    grid-template-rows: [nickname] 20% [country] 20% [description] 60% [end];
+    text-align: left;
+}
+
+.user_icon {
+    grid-column: user_icon;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user_icon img {
+    width: 170px;
+    height: 170px;
+    margin-right: 45px;
+}
+
+.profile_name {
+    grid-row: nickname;
+    font-family: 'Roboto', sans-serif;
+    font-size: 40px;
+    font-weight: 700;
+    color: #f5f5f5;
+}
+
+.profile_button {
+    grid-column: button;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-end;
+}
+
+.edit_button {
+    color: #232323;
+    font-family: 'Roboto', sans-serif;
+    font-size: 24px;
+    font-weight: 500;
+    border: solid 3px #AAB1BB;
+    background-color: #AAB1BB;
+    border-radius: 16px;
+    white-space: nowrap;
+    height: 56px;
+    width: 213px;
+    margin-bottom: 24px;
+}
+
+.edit_button:hover, .edit_button:active {
+    background-color: #8F959D;
+    color: #464646;
+    border-color: #8F959D;
+}
+
+.img_edit_button {
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+}
+
+.logout_button {
+    color: #f5f5f5;
+    font-family: 'Roboto', sans-serif;
+    font-size: 24px;
+    font-weight: 400;
+    background-color: #182029;
+    border: solid 3px #f5f5f5;
+    border-radius: 16px;
+    white-space: nowrap;
+    height: 56px;
+    width: 213px;
+}
+
+.logout_button:hover, .logout_button:active {
+    background-color: #2A3745;
+    color: #f5f5f5;
+    border-color: #2A3745;
+}
+
+.topic-header {
+    width: 100%;
+    margin-top: 20px;
+    margin: 0;
+    display: grid;
+    grid-template-columns: [left-gap] 10% [header-text] max-content [right-gap] auto [end];
+}
+
+.header-line-row {
+    grid-column-start: left-gap;
+    grid-column-end: end;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    margin: 0;
+}
+
+.header-line {
+    position: relative;
+    top: 31px;
+    z-index: -1;
+    height: 1px;
+    background-color: #79747E;
+    width: 100%;
+}
+
+.link_hidden {
+    grid-column: header-text;
+    font-size: 40px;
+    font-family: 'Roboto', sans-serif;
+    background-color: #171717;
+    padding: 8px;
+    padding-bottom: 8px;
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+.preferences, .recommendations, .history {
+    width: 100%;
+    height: 192px;
+}
+
+.empty_text {
+    text-align: center;
+    color: #f5f5f5;
+    font-family: 'Roboto', sans-serif;
+    font-size: 24px;
+    font-weight: 400;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 127px;
+}
+
+.choose_genre {
+    color: #AAB1BB;
+    cursor: pointer;
+}
+
+.arrow_img {
+    width: 20px;
+    height: 20px;
+}
+
+a {
+    color: #f5f5f5;
+    text-decoration: none;
+}
