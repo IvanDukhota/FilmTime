@@ -31,7 +31,7 @@
                 <a href="#" class="social_button" id="google-login">
                     <img src="../styles/images/google.png" alt="Google"> Google
                 </a>
-                <a href="#" class="social_button">
+                <a href="#" class="social_button" id="facebook-login">
                     <img src="../styles/images/facebook.png" alt="Facebook"> Facebook
                 </a>
             </div>
@@ -41,24 +41,37 @@
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            document.getElementById("google-login").addEventListener("click", function (event) {
-                alert('mamutrahal')
-                event.preventDefault(); // Отключаем стандартное поведение ссылки
+        document.getElementById("facebook-login").addEventListener("click", function(event) {
+                event.preventDefault();
 
-                // Делаем запрос к вашему бэкенду на Django, чтобы получить URL авторизации Google
-                fetch("http://localhost:8000/api/v1/google/login/") // Замените на правильный URL
+                fetch("http://localhost:8000/api/v1/facebook/login/")
                     .then(response => response.json())
                     .then(data => {
                         if (data.auth_url) {
-                            // Перенаправляем пользователя на Google для авторизации
                             window.location.href = data.auth_url;
                         } else {
-                            alert("Ошибка при получении URL авторизации Google.");
+                            alert("Error getting Facebook authorization URL.");
                         }
                     })
                     .catch(error => {
-                        console.error("Ошибка запроса к серверу:", error);
+                        console.error("Server request error:", error);
+                    });
+            });
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("google-login").addEventListener("click", function (event) {
+                event.preventDefault();
+
+                fetch("http://localhost:8000/api/v1/google/login/")
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.auth_url) {
+                            window.location.href = data.auth_url;
+                        } else {
+                            alert("Error retrieving Google authorization URL.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Server request error:", error);
                     });
             });
 
@@ -78,6 +91,7 @@
                 errorItem.innerText = message;
                 inputField.parentNode.appendChild(errorItem);
             }
+
 
             emailField.addEventListener('input', function() {
                 const fieldWrapper = emailField.closest('.field_wrapper');
