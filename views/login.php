@@ -28,7 +28,7 @@
             <button type="submit" class="login_button">Login</button>
 
             <div class="social_buttons">
-                <a href="#" class="social_button">
+                <a href="#" class="social_button" id="google-login">
                     <img src="../styles/images/google.png" alt="Google"> Google
                 </a>
                 <a href="#" class="social_button">
@@ -42,6 +42,26 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("google-login").addEventListener("click", function (event) {
+                alert('mamutrahal')
+                event.preventDefault(); // Отключаем стандартное поведение ссылки
+
+                // Делаем запрос к вашему бэкенду на Django, чтобы получить URL авторизации Google
+                fetch("http://localhost:8000/api/v1/google/login/") // Замените на правильный URL
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.auth_url) {
+                            // Перенаправляем пользователя на Google для авторизации
+                            window.location.href = data.auth_url;
+                        } else {
+                            alert("Ошибка при получении URL авторизации Google.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Ошибка запроса к серверу:", error);
+                    });
+            });
+
             const emailField = document.getElementById('email');
             const passwordField = document.getElementById('password');
             const loginForm = document.getElementById('loginForm');
