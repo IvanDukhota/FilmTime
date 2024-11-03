@@ -169,3 +169,64 @@ def google_callback(request):
 
     print("Error retrieving access token:", token_data)
     return JsonResponse({'error': 'Unable to retrieve access token', 'details': token_data}, status=400)
+
+
+
+
+
+
+
+
+
+FACEBOOK_CLIENT_ID = os.getenv('FACEBOOK_CLIENT_ID')
+FACEBOOK_CLIENT_SECRET = os.getenv('FACEBOOK_CLIENT_SECRET')
+FACEBOOK_REDIRECT_URI = 'http://localhost:8000/api/v1/facebook/callback/'
+AUTHORIZATION_BASE_URL = 'https://www.facebook.com/v10.0/dialog/oauth'
+TOKEN_URL = 'https://graph.facebook.com/v10.0/oauth/access_token'
+
+def facebook_login(request):
+    params = {
+        'client_id': FACEBOOK_CLIENT_ID,
+        'redirect_uri': FACEBOOK_REDIRECT_URI,
+        'state': 'random_state_string',
+        'scope': 'email,public_profile',
+    }
+    auth_url = f"{AUTHORIZATION_BASE_URL}?{requests.compat.urlencode(params)}"
+    return JsonResponse({'auth_url': auth_url})
+
+
+def facebook_callback(request):
+    code = request.GET.get('code')
+    if not code:
+        return JsonResponse({'error': 'Authorization code not provided'}, status=400)
+
+    params = {
+        'client_id': FACEBOOK_CLIENT_ID,
+        'redirect_uri': FACEBOOK_REDIRECT_URI,
+        'client_secret': FACEBOOK_CLIENT_SECRET,
+        'code': code,
+    }
+    token_response = requests.get(TOKEN_URL, params=params)
+    token_data = token_response.json()
+
+    if 'access_token' in token_data:
+        access_token = token_data['access_token']
+        user_info_url = 'https://graph.facebook.com/me'
+        user_params = {
+            'fields': 'id,name,email',
+            'access_token': access_token,
+        }
+        user_info_response = requests.get(user_info_url, params=user_params)
+        user_info = user_info_response.json()
+
+        print("User Info:", user_info)
+        return JsonResponse(user_info)
+
+    print("Error retrieving access token:", token_data)
+    return JsonResponse({'error': 'Unable to retrieve access token', 'details': token_data}, status=400)
+
+
+
+
+
+
