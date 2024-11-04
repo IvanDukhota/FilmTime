@@ -68,4 +68,32 @@
         include('footer.html');
         ?>
     </body>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            fetchUserProfile();
+        });
+
+        async function fetchUserProfile() {
+            const accessToken = localStorage.getItem('access_token');
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/v1/user/profile/', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                    },
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    document.querySelector('.profile_name').textContent = data.username;
+                } else {
+                    console.error('Error fetching user profile:', data);
+                }
+            } catch (error) {
+                console.error('Error fetching user profile:', error);
+            }
+        }
+    </script>
 </html>

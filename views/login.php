@@ -57,7 +57,7 @@
                         console.error("Server request error:", error);
                     });
             });
-        document.addEventListener("DOMContentLoaded", function() {
+
             document.getElementById("google-login").addEventListener("click", function (event) {
                 event.preventDefault();
 
@@ -74,6 +74,8 @@
                         console.error("Server request error:", error);
                     });
             });
+            
+        document.addEventListener("DOMContentLoaded", function() {
 
             const emailField = document.getElementById('email');
             const passwordField = document.getElementById('password');
@@ -122,8 +124,10 @@
                     const data = await response.json();
 
                     if (response.ok) {
-                        alert('Authorization successful!');
-                        window.location.href = 'welcome_page.html';  
+                        localStorage.setItem('access_token', data.access);  
+                        localStorage.setItem('refresh_token', data.refresh);
+
+                        window.location.href = 'user_profile.php';  
                     } else {
                         alert(`Error: ${data.error || 'Incorrect credentials.'}`);
                     }
