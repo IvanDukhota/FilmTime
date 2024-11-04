@@ -10,5 +10,18 @@ class UserAdmin(admin.ModelAdmin):
     search_fields = ('email', 'role')
     inlines = [UserProfileInline]
 
-admin.site.register(User, UserAdmin)
+
+class CustomUserAdmin(UserAdmin):
+    model = User
+    list_display = ['email', 'role', 'is_staff', 'is_active']
+    list_filter = ['role', 'is_staff', 'is_active']
+    search_fields = ['email']
+    ordering = ['email']
+
+    fieldsets = (
+        (None, {'fields': ('email', 'password')}),
+        ('Permissions', {'fields': ('role', 'is_staff', 'is_active')}),
+    )
+
 admin.site.register(UserProfile)
+admin.site.register(User, CustomUserAdmin)
