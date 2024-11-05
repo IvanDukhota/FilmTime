@@ -11,13 +11,25 @@
         <link rel="stylesheet" href="../styles/homepage.css">
     </head>
     <body>
-        <?php
-            $headerFile = 'header.html';
-            if(isset($_SESSION['permission']) && $_SESSION['permission'] == PermissionCode::User->value) {
-                $headerFile = 'header-logged-in.html';
-            }
-            include($headerFile);
-        ?>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const token = localStorage.getItem('access_token');
+                let headerFile = 'header.html';
+
+                if (token) {
+                    headerFile = 'header_logged_in.html';
+                }
+
+                fetch(headerFile)
+                    .then(response => response.text())
+                    .then(data => {
+                        document.getElementById("header").innerHTML = data;
+                    })
+                    .catch(error => console.error('Error loading header:', error));
+            });
+        </script>
+        
+        <div id="header" class="page_header"></div>
 
         <section class="hero">
             <div class="hero_content">
