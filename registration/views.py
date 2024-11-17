@@ -1,8 +1,7 @@
 from django.shortcuts import render
-from rest_framework import generics
+from rest_framework import generics, status
 from .models import User, UserProfile
-from .serializers import UserSerializer
-from rest_framework import status
+from .serializers import UserSerializer, CustomTokenObtainPairSerializer,  UserProfileSerializer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth.hashers import check_password
@@ -10,13 +9,11 @@ import os
 from django.http import JsonResponse
 import requests
 from django.contrib.auth import login
-import os
 from dotenv import load_dotenv
 import http.client
 import json
 from urllib.parse import urlencode
 from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializers import CustomTokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from rest_framework.permissions import IsAuthenticated
 
@@ -282,11 +279,34 @@ class UserProfileView(APIView):
         user = request.user
         user_profile = user.userprofile
 
-        data = {
+        data = { 
             "user_id": user.id,
             "email": user.email,
             "username": user_profile.username,
             "role": user.role,
+            "profile_picture": user_profile.profile_picture,
+            "country": user_profile.country,
+            "bio": user_profile.bio,
+            "status": user_profile.status,
         }
 
         return Response(data)
+
+
+
+class EditUserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request):
+        user = request.user
+        user_profile = user.userprofile
+
+        serializer = UserProfileSerializer(
+            user_profile, data=request.data, partial=True
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Profile updated successfully!", "data": serializer.data}, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

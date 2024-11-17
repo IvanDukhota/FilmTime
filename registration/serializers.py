@@ -3,12 +3,13 @@ from rest_framework import serializers
 from .models import User, UserProfile
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-
 class UserProfileSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(source='user.id', read_only=True)
+
     class Meta:
         model = UserProfile
         fields = [
-            "user_profile_id",
+            "id",
             "user_id",
             "username",
             "profile_picture",
@@ -16,7 +17,13 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "bio",
             "status",
         ]
-
+        extra_kwargs = {
+            'username': {'required': False},
+            'profile_picture': {'required': False},
+            'country': {'required': False},
+            'bio': {'required': False},
+            'status': {'read_only': True},
+        }
 
 class UserSerializer(serializers.ModelSerializer):
     user_profile = UserProfileSerializer()
