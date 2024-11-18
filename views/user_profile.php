@@ -86,7 +86,7 @@
             const accessToken = localStorage.getItem('access_token');
 
             try {
-                const response = await fetch('http://127.0.0.1:8000/api/v1/user/profile/', {
+                const response = await fetch('http://127.0.0.1/api/v1/user/profile/', {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${accessToken}`,
