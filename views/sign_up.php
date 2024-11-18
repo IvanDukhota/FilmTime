@@ -47,7 +47,7 @@
             const emailField = document.getElementById('email');
             const passwordField = document.getElementById('password');
             const repeatPasswordField = document.getElementById('repeat_password');
-            const API_URL = 'http://127.0.0.1:8000/api/v1/register/';
+            const API_URL = 'http://127.0.0.1/api/v1/register/';
 
             function clearErrors(fieldWrapper) {
                 const errorMessages = fieldWrapper.querySelectorAll('.error_message');
