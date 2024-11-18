@@ -1,8 +1,3 @@
-<?php
-    session_start();
-    require_once('../models/PermissionCode.php');
-    
-?>
 <!DOCTYPE html>
 <html>
     <head>
@@ -20,6 +15,8 @@
                 <div class="user_icon"><img src="../styles/images/account.png" alt="User Icon"></div>
                 <div class="profile_info">
                     <div class="profile_name">Nickname</div>
+                    <div class="profile_country">Country</div>
+                    <div class="profile_description">Description</div>
                 </div>
                 <div class="profile_button">
                     <button class="edit_button"><img class="img_edit_button" src="../styles/images/edit.png" alt="Edit">Edit</button>
@@ -50,6 +47,18 @@
                     <a href="" class="choose_genre">Choose the genres you like
                         <img class="arrow_img" src="../styles/images/arrow_gray.png" alt="Arrow">
                     </a>
+                </div>
+            </div>
+
+            <div class="saved">
+                <div class="topic-header">
+                    <div class="header-line-row"><div class="header-line"></div></div>
+                    <a href="" class="link_hidden">Saved
+                        <img class="saved_arrow_img" src="../styles/images/arrow_white.png" alt="Arrow">
+                    </a>
+                </div>
+                <div class="empty_text">
+                    <div class="empty_saved">You haven't saved anything yet</div>
                 </div>
             </div>
 

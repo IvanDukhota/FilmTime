@@ -23,15 +23,14 @@ body {
     background-color: #182029;
     padding: 20px;
     width: 816px;
-    height: 218px;
     border-radius: 16px;
     display: grid;
     grid-template-columns: [user_icon] 27% [info] 43% [button] auto [end];
+    align-items: start;
 }
 
 .profile_info {
     grid-column: info;
-    grid-template-rows: [nickname] 20% [country] 20% [description] 60% [end];
     text-align: left;
 }
 
@@ -49,11 +48,28 @@ body {
 }
 
 .profile_name {
-    grid-row: nickname;
     font-family: 'Roboto', sans-serif;
     font-size: 40px;
     font-weight: 700;
     color: #f5f5f5;
+}
+
+.profile_country {
+    font-family: 'Roboto', sans-serif;
+    font-size: 20px;
+    font-weight: 500;
+    color: #f5f5f5;
+    margin-bottom: 10px;
+}
+
+.profile_description {
+    font-family: 'Roboto', sans-serif;
+    font-size: 20px;
+    font-weight: 500;
+    color: #f5f5f5;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
 }
 
 .profile_button {
@@ -62,6 +78,8 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: flex-end;
+    margin-top: 17px;
+    margin-bottom: 17px;
 }
 
 .edit_button {
@@ -176,4 +194,9 @@ body {
 a {
     color: #f5f5f5;
     text-decoration: none;
+}
+
+.saved_arrow_img {
+    width: 25px;
+    height: 25px;
 }
