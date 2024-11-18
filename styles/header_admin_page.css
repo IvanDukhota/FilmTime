@@ -1,0 +1,128 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@200;400;500;700;800&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.page_header {
+    position: sticky;
+    width: 100%;
+    top: 0;
+    z-index: 3;
+    height: fit-content;
+}
+
+.navbar {
+    width: 100%;
+    height: 85px;
+    display: grid;
+    background: linear-gradient(180deg, #1E2A38 0%, #171717 100%);
+    font-family: 'Roboto', sans-serif;
+    color: #f5f5f5;
+    font-weight: normal;
+    font-size: 20px;
+    grid-template-columns: [first] 350px [centre] auto [three] 30% [end];
+}
+
+.logo {
+    grid-column: first;
+    font-family: inherit;
+    font-weight: 900;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: left;
+    font-size: 40px;
+    margin-left: 108px;
+    gap: 10px;
+}
+
+.logo_img {
+    width: 40px;
+    height: 40px;
+    background-image: url(../styles/images/logo.png);
+    background-size: cover;
+}
+
+.links {
+    grid-column: centre;
+    list-style-type: none;
+    display: grid;
+    grid-template-columns: [link-first] 100px [link-second] 110px [link-third] 110px [link-fourth] 110px [link-fifth] auto [end];
+    justify-content: center;
+    font-family: inherit;
+    font-weight: inherit;
+}
+
+.links li {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.link1 {
+    grid-column: link-first;
+}
+
+.link2 {
+    grid-column: link-second;
+}
+
+.link3 {
+    grid-column: link-third;
+}
+
+.link4 {
+    grid-column: link-fourth;
+}
+
+.navbar .link1:hover, .navbar .link1:active,
+.navbar .link2:hover, .navbar .link2:active,
+.navbar .link3:hover, .navbar .link3:active,
+.navbar .link4:hover, .navbar .link4:active {
+    z-index: 4;
+    white-space: nowrap;
+    background-color: #AAB1BB;
+    color: #232323;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+.log_out {
+    grid-column: three;
+    font-family: inherit;
+    font-weight: bold;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: right;
+    margin-right: 108px;
+    gap: 24px;
+}
+
+.log_out_link {
+    border: solid 3px #f5f5f5;
+    border-radius: 8px;
+    white-space: nowrap;
+    padding-left: 35px;
+    padding-right: 35px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+.log_out_link:hover, .log_out_link:active {
+    background-color: #2A3745;
+    color: #f5f5f5;
+    border-color: #2A3745;
+}
+
+a {
+    color: #f5f5f5;
+    text-decoration: none;
+}
+
+
+
+
