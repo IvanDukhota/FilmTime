@@ -4,16 +4,18 @@ services:
     env_file:
       - .env
     expose:
-      - "8000:8000"
+      - "8000"
     volumes:
       - .:/app
     command: bash -c "python manage.py migrate && gunicorn FilmTime.wsgi:application --bind 0.0.0.0:8000"
   php:
     build: ./php
     ports:
-      - "9000:9000"
+      - "9000"
     volumes:
       - .:/app
+    environment:
+      - SERVER_ADDRESS=${SERVER_ADDRESS}
   nginx:
     build: ./nginx
     ports:
