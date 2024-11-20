@@ -44,7 +44,7 @@
         document.getElementById("facebook-login").addEventListener("click", function(event) {
                 event.preventDefault();
 
-                fetch("http://localhost:8000/api/v1/facebook/login/")
+                fetch("http://<?php echo getenv('SERVER_ADDRESS'); ?>/api/v1/facebook/login/")
                     .then(response => response.json())
                     .then(data => {
                         if (data.auth_url) {
@@ -61,7 +61,7 @@
             document.getElementById("google-login").addEventListener("click", function (event) {
                 event.preventDefault();
 
-                fetch("http://localhost:8000/api/v1/google/login/")
+                fetch("http://<?php echo getenv('SERVER_ADDRESS'); ?>/api/v1/google/login/")
                     .then(response => response.json())
                     .then(data => {
                         if (data.auth_url) {
@@ -80,7 +80,7 @@
             const emailField = document.getElementById('email');
             const passwordField = document.getElementById('password');
             const loginForm = document.getElementById('loginForm');
-            const API_URL = 'http://127.0.0.1:8000/api/v1/login/'; 
+            const API_URL = 'http://<?php echo getenv('SERVER_ADDRESS'); ?>/api/v1/login/'; 
 
             function clearErrors(fieldWrapper) {
                 const errorMessages = fieldWrapper.querySelectorAll('.error_message');
