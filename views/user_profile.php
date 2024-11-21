@@ -12,11 +12,11 @@
 
         <section class="profile_section">
             <div class="profile_card">
-                <div class="user_icon"><img src="../styles/images/account.png" alt="Profile Image" id="profileImage"></div>
+                <div class="user_icon"><img src="" alt="Profile Image" id="profileImage"></div>
                 <div class="profile_info">
-                    <div class="profile_name">Nickname</div>
-                    <div class="profile_country">Country</div>
-                    <div class="profile_description">Description</div>
+                    <div class="profile_name"></div>
+                    <div class="profile_country"></div>
+                    <div class="profile_description"></div>
                 </div>
                 <div class="profile_button">
                     <button class="edit_button"><img class="img_edit_button" src="../styles/images/edit.png" alt="Edit">Edit</button>
@@ -30,7 +30,7 @@
                 <div class="form_content">
                     <div class="left_section">
                         <div class="profile_image">
-                            <img src="../styles/images/account.png" alt="Profile Image" id="profileImage">
+                            <img src="../styles/images/account.png" alt="Profile Image" id="profileIcon">
                         </div>
                         <button class="upload_button">
                             <img class="img_upload_button" src="../styles/images/download.png" alt="Upload Image">
@@ -140,6 +140,9 @@
             const nicknameInput = document.querySelector("#nickname");
             const countryInput = document.querySelector("#country");
             const aboutInput = document.querySelector("#about");
+            let currentNickname = "";
+            let currentCountry = '';
+            let currentBio = '';
 
             const fetchUserProfile = async () => {
                 const accessToken = localStorage.getItem('access_token');
@@ -152,14 +155,20 @@
                         },
                     });
 
+                    if (response.status === 401) {
+                        console.log('The access token has expired. Trying to update...');
+                        window.location.href = '/login.php';
+                        return;
+                    }
+
                     const data = await response.json();
 
                     if (response.ok) {
                         document.querySelector('.profile_name').textContent = data.username;
-                        if (data.country) document.querySelector(".profile_country").textContent = data.country;
-                        if (data.bio) document.querySelector(".profile_description").textContent = data.bio;
+                        document.querySelector(".profile_country").textContent = data.country;
+                        document.querySelector(".profile_description").textContent = data.bio;
                         if (data.profile_picture) {
-                            const imgBlob = new Blob([data.profile_picture], { type: "image/png" }); // або "image/jpeg"
+                            const imgBlob = new Blob([data.profile_picture], { type: "image/png" });
                             profileImage.src = URL.createObjectURL(imgBlob);
                         } else {
                             profileImage.src = "../styles/images/account.png";
@@ -187,9 +196,12 @@
 
                     if(response.ok){
                         const data = await response.json();
-                        if(data.username) nicknameInput.value = data.username;
-                        if(data.country) countryInput.value = data.country;
-                        if(data.bio) aboutInput.value = data.bio;
+                        currentNickname = data.username || '';
+                        nicknameInput.value = currentNickname;
+                        currentCountry = data.country || '';
+                        countryInput.value = currentCountry;
+                        currentBio = data.bio || '';
+                        aboutInput.value = currentBio;
                         if (data.profile_picture) {
                             const imgBlob = new Blob([data.profile_picture], { type: "image/png" });
                             formImage.src = URL.createObjectURL(imgBlob);
@@ -204,13 +216,15 @@
 
             const uploadButton = document.querySelector(".upload_button");
             const fileInput = uploadButton.querySelector("input[type='file']");
-
+            
             uploadButton.addEventListener("click", () => {
+                clearErrors(uploadFileInput.closest(".upload_button"));
                 fileInput.click();
             });
 
             fileInput.addEventListener("change", (e) => {
                 const file = e.target.files[0];
+                clearErrors(uploadFileInput.closest(".upload_button"));
                 if(file){
                     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
                         addError(uploadFileInput.closest(".upload_button"), "Invalid image format. Use JPG, PNG, or WebP.");
@@ -271,7 +285,6 @@
             }
 
             editForm.querySelector(".edit_button").addEventListener("click", async function (event) {
-                event.preventDefault();
                 let isValid = true;
 
                 clearErrors(nicknameField.closest(".field_wrapper"));
@@ -304,35 +317,28 @@
                     isValid = false;
                 }
 
-                clearErrors(uploadFileInput.closest(".upload_button"));
-                if (uploadFileInput.files.length > 0) {
-                    const file = uploadFileInput.files[0];
-                    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-                        addError(uploadFileInput.closest(".upload_button"), "Invalid image format. Use JPG, PNG, or WebP.");
-                        isValid = false;
-                    } else if (file.size > 5 * 1024 * 1024) {
-                        addError(uploadFileInput.closest(".upload_button"), "Image must be less than 5MB.");
-                        isValid = false;
-                    }
-                }
-
                 if(!isValid) return;
 
                 const formData = new FormData();
-                if(nicknameInput.value.trim() !== data.username){
+                //Немає перевірки чи існує вже користувач з таким ім'ям
+                if(nicknameInput.value.trim() !== currentNickname){
                     formData.append("username", nicknameInput.value.trim());
                 }
+                //Як у нас зберігається пароль та як його можна замінити?
                 if(passwordField.value.trim().length > 0){
                     formData.append("password", passwordField.value.trim());
                 }
-                if(countryInput.value.trim() !== data.country){
+                if(countryInput.value.trim() !== currentCountry){
                     formData.append("country", countryInput.value.trim());
                 }
-                if(aboutInput.value.trim() !== data.bio){
+                if(aboutInput.value.trim() !== currentBio){
                     formData.append("bio", aboutInput.value.trim());
                 }
-                if(uploadFileInput.files.length > 0){
-                    formData.append("profile_picture", uploadFileInput.files[0]);
+                //Необхідно розібратися зі збереженням фотографій, в базі даних вони мають зберігатися у форматі Blob
+                if(!formImage.src.includes("account.png")){
+                    const response = await fetch(formImage.src);
+                    const blob = await response.blob();
+                    formData.append("profile_picture", blob, "updated_profile_picture.png");
                 }
 
                 await editUserProfile(formData);
