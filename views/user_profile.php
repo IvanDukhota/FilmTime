@@ -220,12 +220,12 @@
             const fileInput = uploadButton.querySelector("input[type='file']");
             
             uploadButton.addEventListener("click", () => {
-                clearErrors(uploadField.closest(".field_wrapper"));
                 fileInput.click();
             });
 
             fileInput.addEventListener("change", (e) => {
                 const file = e.target.files[0];
+                clearErrors(uploadField.closest(".field_wrapper"));
                 if(file){
                     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
                         addError(uploadField, "Invalid image format. Use JPG, PNG, or WebP.");
@@ -234,6 +234,7 @@
                     } else{
                         formImage.src = URL.createObjectURL(file);
                     }
+                    fileInput.value = "";
                 }
             });
 
@@ -327,9 +328,11 @@
                 if(nicknameInput.value.trim() !== currentNickname){
                     formData.append("username", nicknameInput.value.trim());
                 }
-                //Як у нас зберігається пароль та як його можна замінити?
-                if(passwordField.value.trim().length > 0){
-                    formData.append("password", passwordField.value.trim());
+                //Необхідно розібратися зі збереженням фотографій, в базі даних вони мають зберігатися у форматі Blob
+                if(!formImage.src.includes("account.png")){
+                    const response = await fetch(formImage.src);
+                    const blob = await response.blob();
+                    formData.append("profile_picture", blob, "updated_profile_picture.png");
                 }
                 if(countryInput.value.trim() !== currentCountry){
                     formData.append("country", countryInput.value.trim());
@@ -337,11 +340,9 @@
                 if(aboutInput.value.trim() !== currentBio){
                     formData.append("bio", aboutInput.value.trim());
                 }
-                //Необхідно розібратися зі збереженням фотографій, в базі даних вони мають зберігатися у форматі Blob
-                if(!formImage.src.includes("account.png")){
-                    const response = await fetch(formImage.src);
-                    const blob = await response.blob();
-                    formData.append("profile_picture", blob, "updated_profile_picture.png");
+                //Як у нас зберігається пароль та як його можна замінити?
+                if(passwordField.value.trim().length > 0){
+                    formData.append("password", passwordField.value.trim());
                 }
 
                 await editUserProfile(formData);
