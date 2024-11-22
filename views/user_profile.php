@@ -32,11 +32,13 @@
                         <div class="profile_image">
                             <img src="../styles/images/account.png" alt="Profile Image" id="profileIcon">
                         </div>
-                        <button class="upload_button">
-                            <img class="img_upload_button" src="../styles/images/download.png" alt="Upload Image">
-                            Upload new photo
-                            <input type="file" accept="image/png, image/jpeg, image/webp" style="display: none;">
-                        </button>
+                        <div class="field_wrapper">
+                            <button class="upload_button" id="uploadButton">
+                                <img class="img_upload_button" src="../styles/images/download.png" alt="Upload Image">
+                                Upload new photo
+                                <input type="file" accept="image/png, image/jpeg, image/webp" style="display: none;">
+                            </button>
+                        </div>
                     </div>
 
                     <div class="right_section">
@@ -218,18 +220,17 @@
             const fileInput = uploadButton.querySelector("input[type='file']");
             
             uploadButton.addEventListener("click", () => {
-                clearErrors(uploadFileInput.closest(".upload_button"));
+                clearErrors(uploadField.closest(".field_wrapper"));
                 fileInput.click();
             });
 
             fileInput.addEventListener("change", (e) => {
                 const file = e.target.files[0];
-                clearErrors(uploadFileInput.closest(".upload_button"));
                 if(file){
                     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-                        addError(uploadFileInput.closest(".upload_button"), "Invalid image format. Use JPG, PNG, or WebP.");
+                        addError(uploadField, "Invalid image format. Use JPG, PNG, or WebP.");
                     } else if (file.size > 5 * 1024 * 1024) {
-                        addError(uploadFileInput.closest(".upload_button"), "Image must be less than 5MB.");
+                        addError(uploadField, "Image must be less than 5MB.");
                     } else{
                         formImage.src = URL.createObjectURL(file);
                     }
@@ -255,6 +256,7 @@
                     });
 
                     if(response.ok){
+                        alert("Profile updated successfully!");
                         editForm.classList.add("hidden");
                         await fetchUserProfile();
                     } else {
@@ -270,6 +272,7 @@
             const repeatPasswordField = document.getElementById("repeat_password");
             const countryField = document.getElementById("country");
             const aboutField = document.getElementById("about");
+            const uploadField = document.getElementById("uploadButton")
             const uploadFileInput = document.querySelector(".upload_button input[type='file']");
 
             function clearErrors(fieldWrapper) {

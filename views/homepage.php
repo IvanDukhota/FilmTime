@@ -1,8 +1,3 @@
-<?php
-    session_start();
-    require_once('../models/PermissionCode.php');
-    
-?>
 <!DOCTYPE html>
 <html>
     <head>
@@ -12,12 +7,25 @@
     </head>
     <body>
         <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                const token = localStorage.getItem('access_token');
+            document.addEventListener("DOMContentLoaded", async function() {
+                const accessToken = localStorage.getItem('access_token');
                 let headerFile = 'header.html';
 
-                if (token) {
-                    headerFile = 'header_logged_in.html';
+                if(accessToken) {
+                    try {
+                        const response = await fetch('http://<?php echo getenv('SERVER_ADDRESS'); ?>/api/v1/user/profile/', {
+                            method: 'GET',
+                            headers: {
+                                'Authorization': `Bearer ${accessToken}`,
+                            },
+                        });
+
+                        if (response.ok) {
+                            headerFile = 'header_logged_in.html';
+                        }
+                    } catch (error) {
+                        console.error('Error fetching user profile:', error);
+                    }
                 }
 
                 fetch(headerFile)
