@@ -142,6 +142,7 @@
             const nicknameInput = document.querySelector("#nickname");
             const countryInput = document.querySelector("#country");
             const aboutInput = document.querySelector("#about");
+            let userPicture = "../styles/images/account.png";
             let currentNickname = "";
             let currentCountry = '';
             let currentBio = '';
@@ -207,6 +208,7 @@
                         if (data.profile_picture) {
                             const imgBlob = new Blob([data.profile_picture], { type: "image/png" });
                             formImage.src = URL.createObjectURL(imgBlob);
+                            userPicture = URL.createObjectURL(imgBlob);
                         } else {
                             formImage.src = "../styles/images/account.png";
                         }
@@ -229,8 +231,10 @@
                 if(file){
                     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
                         addError(uploadField, "Invalid image format. Use JPG, PNG, or WebP.");
+                        formImage.src = userPicture;
                     } else if (file.size > 5 * 1024 * 1024) {
                         addError(uploadField, "Image must be less than 5MB.");
+                        formImage.src = userPicture;
                     } else{
                         formImage.src = URL.createObjectURL(file);
                     }
