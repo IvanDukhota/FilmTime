@@ -3,6 +3,7 @@ from rest_framework import serializers
 from .models import User, UserProfile
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
+
 class UserProfileSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(source='user.id', read_only=True)
 
@@ -106,3 +107,74 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         data = super().validate(attrs)
         return data
+
+class MovieSerializer(serializers.Serializer):
+    title = serializers.CharField(max_length=255)
+    url = serializers.URLField()
+
+
+
+
+from .models import Content, ContentDetail, Genre, Actor, Director, ContentGenre, ContentActor, ContentDirector
+
+class GenreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Genre
+        fields = ['name']
+
+class ActorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Actor
+        fields = ['name']
+
+class DirectorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Director
+        fields = ['name']
+
+class ContentDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContentDetail
+        fields = ['synopsis', 'duration_seconds', 'content_rating']
+
+class DirectorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Director
+        fields = ['name']
+
+class ContentSerializer(serializers.ModelSerializer):
+    details = ContentDetailSerializer(source='contentdetail', read_only=True)
+    genres = serializers.SerializerMethodField()
+    actors = serializers.SerializerMethodField()
+    directors = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Content
+        fields = [
+            'content_id',
+            'title',
+            'release_date',
+            'content_type',
+            'trailer_url',
+            'rating',
+            'details',
+            'genres',
+            'actors',
+            'directors',
+        ]
+
+    def get_genres(self, obj):
+    
+        genres = Genre.objects.filter(contentgenre__content=obj)
+        return GenreSerializer(genres, many=True).data
+
+    def get_actors(self, obj):
+    
+        actors = Actor.objects.filter(contentactor__content=obj)
+        return ActorSerializer(actors, many=True).data
+
+    def get_directors(self, obj):
+   
+        directors = Director.objects.filter(contentdirector__content=obj)
+        return DirectorSerializer(directors, many=True).data
+
