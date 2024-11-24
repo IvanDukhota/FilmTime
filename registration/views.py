@@ -16,7 +16,10 @@ from urllib.parse import urlencode
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from rest_framework.permissions import IsAuthenticated
-
+from .serializers import MovieSerializer
+from rest_framework.decorators import api_view
+from .models import Content
+from .serializers import ContentSerializer
 
 class UserListView(generics.ListAPIView):
     queryset = User.objects.all()
@@ -300,13 +303,38 @@ class EditUserProfileView(APIView):
     def patch(self, request):
         user = request.user
         user_profile = user.userprofile
-
+        password = request.data.get("password")
+        if password:
+            if len(password) < 8:
+                return Response({"error": "Password must be at least 8 characters long."}, status=status.HTTP_400_BAD_REQUEST)
+            user.set_password(password)
+            user.save()
+        user_profile_data = request.data.copy()
+        user_profile_data.pop("password", None)
         serializer = UserProfileSerializer(
-            user_profile, data=request.data, partial=True
+            user_profile, data=user_profile_data, partial=True
         )
 
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "Profile updated successfully!", "data": serializer.data}, status=status.HTTP_200_OK)
+            return Response({
+                "message": "Profile updated successfully!",
+                "data": serializer.data
+            }, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class Movies(APIView):
+    def movie_link(request):
+        movie_url = f"http://localhost:8000/media/movies/videoplayback (1).mp4"
+        return JsonResponse({'url': movie_url})
+    
+
+class MovieDetailView(APIView):
+    def get(self, request, content_id):
+        try:
+            content = Content.objects.get(content_id=content_id)
+            serializer = ContentSerializer(content)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Content.DoesNotExist:
+            return Response({"error": "Content not found"}, status=status.HTTP_404_NOT_FOUND)

@@ -1,6 +1,6 @@
 # registration/urls.py
 from django.urls import path
-from .views import UserListView, UserDetailView, CheckUserView, RegisterUserView, LoginView, UserProfileView,  google_login,google_callback, facebook_login, facebook_callback, CustomTokenObtainPairView, EditUserProfileView
+from .views import UserListView, UserDetailView, CheckUserView, RegisterUserView, LoginView, UserProfileView,  google_login,google_callback, facebook_login, facebook_callback, CustomTokenObtainPairView, EditUserProfileView, Movies, MovieDetailView
 from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
@@ -18,4 +18,6 @@ urlpatterns = [
     path('user/profile/', UserProfileView.as_view(), name='user_profile'),
 
     path('user/profile/edit/', EditUserProfileView.as_view(), name='edit-profile'),
+    path('movie/', Movies.movie_link, name='movie_link'),
+    path('movie/<int:content_id>/', MovieDetailView.as_view(), name='movie-detail'),
 ]
