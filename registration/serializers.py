@@ -2,11 +2,12 @@ from django.contrib.auth import authenticate
 from rest_framework import serializers
 from .models import User, UserProfile
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework.fields import ImageField
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(source='user.id', read_only=True)
-
+    profile_picture = ImageField(allow_empty_file=True, required=False)
     class Meta:
         model = UserProfile
         fields = [

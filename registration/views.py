@@ -20,7 +20,8 @@ from .serializers import MovieSerializer
 from rest_framework.decorators import api_view
 from .models import Content
 from .serializers import ContentSerializer
-
+from django.core.files.base import ContentFile
+import base64
 class UserListView(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -282,12 +283,16 @@ class UserProfileView(APIView):
         user = request.user
         user_profile = user.userprofile
 
-        data = { 
+        data = {
             "user_id": user.id,
             "email": user.email,
             "username": user_profile.username,
             "role": user.role,
-            "profile_picture": user_profile.profile_picture,
+            "profile_picture": (
+                user_profile.profile_picture.url
+                if user_profile.profile_picture
+                else None
+            ),
             "country": user_profile.country,
             "bio": user_profile.bio,
             "status": user_profile.status,
@@ -296,33 +301,34 @@ class UserProfileView(APIView):
         return Response(data)
 
 
-
 class EditUserProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
     def patch(self, request):
         user = request.user
         user_profile = user.userprofile
+
         password = request.data.get("password")
         if password:
-            if len(password) < 8:
-                return Response({"error": "Password must be at least 8 characters long."}, status=status.HTTP_400_BAD_REQUEST)
             user.set_password(password)
             user.save()
-        user_profile_data = request.data.copy()
-        user_profile_data.pop("password", None)
+
+        profile_picture = request.FILES.get("profile_picture")
+        if profile_picture:
+            user_profile.profile_picture = profile_picture
+
         serializer = UserProfileSerializer(
-            user_profile, data=user_profile_data, partial=True
+            user_profile, data=request.data, partial=True
         )
 
         if serializer.is_valid():
             serializer.save()
-            return Response({
-                "message": "Profile updated successfully!",
-                "data": serializer.data
-            }, status=status.HTTP_200_OK)
+            return Response(
+                {"message": "Profile updated successfully!"}, status=status.HTTP_200_OK
+            )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     
 class Movies(APIView):
     def movie_link(request):
