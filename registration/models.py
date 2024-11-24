@@ -10,6 +10,9 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from uuid import uuid4
+import os
+
 
 # class User(AbstractBaseUser):
 #     user_id = models.AutoField(primary_key=True)
@@ -68,8 +71,13 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.is_superuser
 
     def has_module_perms(self, app_label):
-
         return self.is_superuser
+
+
+def unique_upload_path(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = f"{uuid4()}.{ext}"
+    return os.path.join('profile_pictures', filename)
 
 
 class UserProfile(models.Model):
@@ -77,7 +85,19 @@ class UserProfile(models.Model):
         User, on_delete=models.CASCADE, related_name="userprofile"
     )
     username = models.CharField(max_length=32, unique=True)
-    profile_picture = models.BinaryField(null=True, blank=True)
+    profile_picture = models.ImageField(upload_to=unique_upload_path, null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        try:
+            old_file = UserProfile.objects.get(pk=self.pk).profile_picture
+            if old_file and old_file != self.profile_picture:
+                if os.path.isfile(old_file.path):
+                    os.remove(old_file.path)
+        except UserProfile.DoesNotExist:
+            pass
+
+        super().save(*args, **kwargs)
+
     country = models.CharField(max_length=100, null=True, blank=True)
     bio = models.TextField(null=True, blank=True)
     status = models.CharField(
@@ -252,7 +272,6 @@ class ContentDetail(models.Model):
 
     def __str__(self):
         return f"{self.content.title} Details"
-
 
 # from django.db import models
 # from django.contrib.auth.models import AbstractBaseUser
