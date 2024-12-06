@@ -16,10 +16,8 @@ from urllib.parse import urlencode
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from rest_framework.permissions import IsAuthenticated
-from .serializers import MovieSerializer
 from rest_framework.decorators import api_view
 from DataBase.models import Content
-from .serializers import ContentSerializer
 from django.core.files.base import ContentFile
 import base64
 
@@ -330,18 +328,3 @@ class EditUserProfileView(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    
-class Movies(APIView):
-    def movie_link(self, request):
-        movie_url = f"http://localhost:8000/media/movies/videoplayback (1).mp4"
-        return JsonResponse({'url': movie_url})
-    
-
-class MovieDetailView(APIView):
-    def get(self, request, content_id):
-        try:
-            content = Content.objects.get(content_id=content_id)
-            serializer = ContentSerializer(content)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Content.DoesNotExist:
-            return Response({"error": "Content not found"}, status=status.HTTP_404_NOT_FOUND)

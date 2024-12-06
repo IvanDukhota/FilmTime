@@ -48,6 +48,7 @@ INSTALLED_APPS = [
 
     "registration",
     "DataBase",
+    "content",
 ]
 
 MIDDLEWARE = [
