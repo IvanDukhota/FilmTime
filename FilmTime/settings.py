@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "corsheaders",
 
     "registration",
+    "DataBase",
 ]
 
 MIDDLEWARE = [
@@ -89,10 +90,10 @@ WSGI_APPLICATION = "FilmTime.wsgi.application"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'film_time_db',
+        'NAME': 'FilmTime',
         'USER': 'postgres',
-        'PASSWORD': 'rM$&N:2M?zMF,',
-        'HOST': 'ft-database-1.c7m0esso4ghl.eu-north-1.rds.amazonaws.com',
+        'PASSWORD': 'root',
+        'HOST': 'localhost',
         'PORT': '5432',
     }
 }
@@ -112,7 +113,7 @@ SIMPLE_JWT = {
     'USER_ID_CLAIM': 'user_id',
 }
 
-AUTH_USER_MODEL = 'registration.User'
+AUTH_USER_MODEL = 'DataBase.User'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

@@ -1,13 +1,26 @@
 from django.contrib.auth import authenticate
 from rest_framework import serializers
-from .models import User, UserProfile
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework.fields import ImageField
+from DataBase.models import (
+    User,
+    UserProfile,
+    Content,
+    Genre,
+    Actor,
+    ContentActor,
+    ContentList,
+    Series,
+    Season,
+    Episode,
+    Movie,
+    UserProfileContentInfo,
+    Subscription,
+)
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    user_id = serializers.IntegerField(source='user.id', read_only=True)
-    profile_picture = ImageField(allow_empty_file=True, required=False)
+    user_id = serializers.IntegerField(source="user.id", read_only=True)
+    profile_picture = serializers.ImageField(allow_empty_file=True, required=False)
+
     class Meta:
         model = UserProfile
         fields = [
@@ -20,12 +33,13 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "status",
         ]
         extra_kwargs = {
-            'username': {'required': False},
-            'profile_picture': {'required': False},
-            'country': {'required': False},
-            'bio': {'required': False},
-            'status': {'read_only': True},
+            "username": {"required": False},
+            "profile_picture": {"required": False},
+            "country": {"required": False},
+            "bio": {"required": False},
+            "status": {"read_only": True},
         }
+
 
 class UserSerializer(serializers.ModelSerializer):
     user_profile = UserProfileSerializer()
@@ -33,7 +47,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            "user_id",
+            "id",
             "email",
             "password",
             "date_joined",
@@ -41,34 +55,25 @@ class UserSerializer(serializers.ModelSerializer):
             "user_profile",
         ]
         extra_kwargs = {
-            "password": {
-                "write_only": True
-            },
+            "password": {"write_only": True},
         }
 
     def create(self, validated_data):
-        # Extract user_profile data
         user_profile_data = validated_data.pop("user_profile")
-        # Create user instance
         user = User.objects.create(**validated_data)
-        user.set_password(validated_data['password'])
+        user.set_password(validated_data["password"])
         user.save()
-        # Create UserProfile instance
         UserProfile.objects.create(user=user, **user_profile_data)
         return user
 
     def update(self, instance, validated_data):
-        # Extract user_profile data
         user_profile_data = validated_data.pop("user_profile", None)
-
-        # Update User instance
         instance.email = validated_data.get("email", instance.email)
         if "password" in validated_data:
             instance.set_password(validated_data["password"])
         instance.role = validated_data.get("role", instance.role)
         instance.save()
 
-        # Update UserProfile instance if it exists
         if user_profile_data:
             user_profile = instance.userprofile
             user_profile.username = user_profile_data.get(
@@ -87,95 +92,116 @@ class UserSerializer(serializers.ModelSerializer):
         return instance
 
 
-class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+class CustomTokenObtainPairSerializer(serializers.Serializer):
     @classmethod
     def get_token(cls, user):
-        token = super().get_token(user)
-
-        token['user_id'] = user.id
-        token['role'] = user.role
-
+        token = super().get_token(user)  # type: ignore
+        token["user_id"] = user.id
+        token["role"] = user.role
         return token
 
     def validate(self, attrs):
-        email = attrs.get('email')
-        password = attrs.get('password')
-
-        user = authenticate(request=self.context.get('request'), email=email, password=password)
-
+        email = attrs.get("email")
+        password = attrs.get("password")
+        user = authenticate(
+            request=self.context.get("request"), email=email, password=password
+        )
         if user is None:
-            raise serializers.ValidationError('Invalid email or password')
-
+            raise serializers.ValidationError("Invalid email or password")
         data = super().validate(attrs)
         return data
 
-class MovieSerializer(serializers.Serializer):
-    title = serializers.CharField(max_length=255)
-    url = serializers.URLField()
-
-
-
-
-from .models import Content, ContentDetail, Genre, Actor, Director, ContentGenre, ContentActor, ContentDirector
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
-        fields = ['name']
+        fields = ["id", "name"]
+
 
 class ActorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Actor
-        fields = ['name']
+        fields = ["id", "name"]
 
-class DirectorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Director
-        fields = ['name']
 
-class ContentDetailSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ContentDetail
-        fields = ['synopsis', 'duration_seconds', 'content_rating']
+class ContentActorSerializer(serializers.ModelSerializer):
+    actor = ActorSerializer()
 
-class DirectorSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Director
-        fields = ['name']
+        model = ContentActor
+        fields = ["id", "content", "actor", "character_name"]
+
+
+class ContentListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContentList
+        fields = ["id", "userprofile", "content", "list_name", "create_date"]
+
+
+class MovieSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Movie
+        fields = ["id", "content", "duration", "critic_rating", "content_url"]
+
+
+class SeasonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Season
+        fields = ["id", "series", "number", "release_date", "critic_rating"]
+
+
+class EpisodeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Episode
+        fields = ["id", "season", "number", "release_date", "title", "duration"]
+
+
+class SeriesSerializer(serializers.ModelSerializer):
+    seasons = SeasonSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Series
+        fields = ["id", "content", "seasons"]
+
 
 class ContentSerializer(serializers.ModelSerializer):
-    details = ContentDetailSerializer(source='contentdetail', read_only=True)
     genres = serializers.SerializerMethodField()
     actors = serializers.SerializerMethodField()
-    directors = serializers.SerializerMethodField()
 
     class Meta:
         model = Content
         fields = [
-            'content_id',
-            'title',
-            'release_date',
-            'content_type',
-            'trailer_url',
-            'rating',
-            'details',
-            'genres',
-            'actors',
-            'directors',
+            "id",
+            "title",
+            "release_date",
+            "content_type",
+            "trailer_url",
+            "synopsis",
+            "director_name",
+            "genres",
+            "actors",
         ]
 
     def get_genres(self, obj):
-    
-        genres = Genre.objects.filter(contentgenre__content=obj)
+        genres = Genre.objects.filter(contentgenres__content=obj)
         return GenreSerializer(genres, many=True).data
 
     def get_actors(self, obj):
-    
         actors = Actor.objects.filter(contentactor__content=obj)
         return ActorSerializer(actors, many=True).data
 
-    def get_directors(self, obj):
-   
-        directors = Director.objects.filter(contentdirector__content=obj)
-        return DirectorSerializer(directors, many=True).data
 
+class UserProfileContentInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfileContentInfo
+        fields = [
+            "id",
+            "userprofile",
+            "content",
+            "last_watch",
+            "user_rating",
+            "comment",
+            "comment_date",
+            "movie_progress",
+            "episode_progress",
+        ]
