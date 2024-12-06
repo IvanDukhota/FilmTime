@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework import generics, status
-from .models import User, UserProfile
+from DataBase.models import User, UserProfile
 from .serializers import UserSerializer, CustomTokenObtainPairSerializer,  UserProfileSerializer
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -18,10 +18,11 @@ from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from .serializers import MovieSerializer
 from rest_framework.decorators import api_view
-from .models import Content
+from DataBase.models import Content
 from .serializers import ContentSerializer
 from django.core.files.base import ContentFile
 import base64
+
 class UserListView(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -331,7 +332,7 @@ class EditUserProfileView(APIView):
 
     
 class Movies(APIView):
-    def movie_link(request):
+    def movie_link(self, request):
         movie_url = f"http://localhost:8000/media/movies/videoplayback (1).mp4"
         return JsonResponse({'url': movie_url})
     
