@@ -4,6 +4,7 @@ from DataBase.models import (
     User,
     UserProfile,
     UserProfileContentInfo,
+    Genre
 )
 
 
@@ -116,3 +117,11 @@ class UserProfileContentInfoSerializer(serializers.ModelSerializer):
             "movie_progress",
             "episode_progress",
         ]
+
+
+
+
+class GenreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Genre
+        fields = ['id', 'name']

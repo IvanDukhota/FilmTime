@@ -68,3 +68,4 @@ class ContentViewSet(viewsets.ReadOnlyModelViewSet):
         serializer = self.get_serializer(filtered_movies, many=True)
 
         return Response(serializer.data)
+
