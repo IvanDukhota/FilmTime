@@ -1,6 +1,6 @@
 # registration/urls.py
 from django.urls import path
-from .views import UserListView, UserDetailView, CheckUserView, RegisterUserView, LoginView, UserProfileView,  google_login,google_callback, facebook_login, facebook_callback, CustomTokenObtainPairView, EditUserProfileView
+from .views import UserListView, UserDetailView, CheckUserView, RegisterUserView, LoginView, UserProfileView,  google_login,google_callback, facebook_login, facebook_callback, CustomTokenObtainPairView, EditUserProfileView, GenreListView, AddUserGenresView, UpdateUserGenresView
 from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
@@ -18,4 +18,10 @@ urlpatterns = [
     path('user/profile/', UserProfileView.as_view(), name='user_profile'),
 
     path('user/profile/edit/', EditUserProfileView.as_view(), name='edit-profile'),
+
+    path('genres/', GenreListView.as_view(), name='genre-list'),
+
+
+    path('add-user-genres/', AddUserGenresView.as_view(), name='add-user-genres'),
+    path('update-user-genres/', UpdateUserGenresView.as_view(), name='update-user-genres'),
 ]

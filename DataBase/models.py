@@ -248,3 +248,4 @@ class ContentList(models.Model):
         return (
             f"{self.list_name} - {self.content.title} for {self.userprofile.username}"
         )
+
