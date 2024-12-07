@@ -10,7 +10,9 @@ from DataBase.models import (
     Episode,
     Movie,
     Director,  
-    ContentDirector, 
+    ContentDirector,
+    ContentList,
+    Content,
 )
 
 
@@ -35,9 +37,35 @@ class ContentActorSerializer(serializers.ModelSerializer):
 
 
 class ContentListSerializer(serializers.ModelSerializer):
+    content_title = serializers.CharField(source="content.title", read_only=True)
+    content_id = serializers.IntegerField(source="content.id", write_only=True)
+    userprofile_username = serializers.CharField(source="userprofile.username", read_only=True)
+
     class Meta:
         model = ContentList
-        fields = ["id", "userprofile", "content", "list_name", "create_date"]
+        fields = ['id', 'userprofile', 'content', 'list_name', 'create_date', 'content_title', 'content_id', 'userprofile_username']
+
+    def create(self, validated_data):
+        userprofile = self.context['request'].user.userprofile
+
+        content = Content.objects.get(id=validated_data['content'].id)
+
+        existing_content = ContentList.objects.filter(
+            content=content,
+            list_name=validated_data['list_name'],
+            userprofile=userprofile
+        ).exists()
+
+        if existing_content:
+            raise serializers.ValidationError("This content is already in the specified list.")
+
+        content_list = ContentList.objects.create(
+            userprofile=userprofile,
+            content=content,
+            list_name=validated_data['list_name']
+        )
+        return content_list
+
 
 
 class MovieSerializer(serializers.ModelSerializer):
