@@ -58,9 +58,9 @@
                     </a>
                 </div>
                 <div class="media_list">
-                    <a href="" class="media_item">
-                        <img class="media" src="../styles/images/The_hunger_game.jpg" alt="The Hunger Games">
-                        <div class="media_title">The Hunger Games: The Ballad of Songbirds & Snakes</div>
+                    <a href="content_viewer.php" class="media_item">
+                        <img class="media" src="../styles/images/shutter island.png" alt="Shutter Island">
+                        <div class="media_title">Shutter Island</div>
                     </a>
                     <a href="" class="media_item">
                         <img class="media" src="../styles/images/Harry_potter.jpg" alt="Harry Potter">
