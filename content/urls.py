@@ -8,3 +8,4 @@ urlpatterns = [
     path('movie/<int:content_id>/', MovieDetailView.as_view(), name='movie-detail'),
     path('movies/filter/', ContentViewSet.as_view({'get': 'filter_movies'}), name='movie-filter'),
 ]
+

@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "registration",
     "DataBase",
     "content",
+    "user",
 ]
 
 MIDDLEWARE = [

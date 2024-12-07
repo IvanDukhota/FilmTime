@@ -24,7 +24,7 @@ class Movies(APIView):
 class MovieDetailView(APIView):
     def get(self, request, content_id):
         try:
-            content = Content.objects.get(content_id=content_id)
+            content = Content.objects.get(id=content_id)
             serializer = ContentSerializer(content)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Content.DoesNotExist:

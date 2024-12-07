@@ -9,7 +9,10 @@ from DataBase.models import (
     Season,
     Episode,
     Movie,
+    Director,  
+    ContentDirector, 
 )
+
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
@@ -63,9 +66,20 @@ class SeriesSerializer(serializers.ModelSerializer):
         fields = ["id", "content", "seasons"]
 
 
+class DirectorSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Director
+        fields = ["id", "name"]
+
+
 class ContentSerializer(serializers.ModelSerializer):
+
     genres = serializers.SerializerMethodField()
     actors = serializers.SerializerMethodField()
+    directors = serializers.SerializerMethodField()
+    movie = MovieSerializer(read_only=True) 
+    series = SeriesSerializer(read_only=True)  
 
     class Meta:
         model = Content
@@ -76,15 +90,24 @@ class ContentSerializer(serializers.ModelSerializer):
             "content_type",
             "trailer_url",
             "synopsis",
-            "director_name",
-            "genres",
-            "actors",
+            "directors",  
+            "genres",  
+            "actors",  
+            "movie",  
+            "series",  
         ]
 
     def get_genres(self, obj):
+
         genres = Genre.objects.filter(contentgenres__content=obj)
         return GenreSerializer(genres, many=True).data
 
     def get_actors(self, obj):
+
         actors = Actor.objects.filter(contentactor__content=obj)
         return ActorSerializer(actors, many=True).data
+
+    def get_directors(self, obj):
+
+        directors = Director.objects.filter(contentdirector__content=obj)
+        return DirectorSerializer(directors, many=True).data
