@@ -284,6 +284,9 @@ class UserProfileView(APIView):
         user = request.user
         user_profile = user.userprofile
 
+       
+        user_genres = UserGenres.objects.filter(userprofile=user_profile).select_related('genre')
+
         data = {
             "user_id": user.id,
             "email": user.email,
@@ -297,9 +300,15 @@ class UserProfileView(APIView):
             "country": user_profile.country,
             "bio": user_profile.bio,
             "status": user_profile.status,
+            "genres": [
+                {"id": ug.genre.id, "name": ug.genre.name} for ug in user_genres
+            ], 
         }
 
         return Response(data)
+
+
+
 
 
 class EditUserProfileView(APIView):
@@ -336,11 +345,6 @@ class GenreListView(APIView):
         genres = Genre.objects.all()
         serializer = GenreSerializer(genres, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-
-
-
 
 
 class AddUserGenresView(APIView):
@@ -397,19 +401,25 @@ class UpdateUserGenresView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        genres = Genre.objects.filter(id__in=new_genre_ids)
-        if genres.count() != len(new_genre_ids):
-            return Response(
-                {"error": "Doesnt exist."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+      
+        current_genres = UserGenres.objects.filter(userprofile=user_profile).values_list('genre_id', flat=True)
 
-        UserGenres.objects.filter(userprofile=user_profile).delete()
+     
+        genres_to_add = set(new_genre_ids) - set(current_genres)
 
-        for genre in genres:
+     
+        genres_to_remove = set(current_genres) - set(new_genre_ids)
+
+      
+        UserGenres.objects.filter(userprofile=user_profile, genre_id__in=genres_to_remove).delete()
+
+       
+        for genre_id in genres_to_add:
+            genre = Genre.objects.get(id=genre_id)
             UserGenres.objects.create(userprofile=user_profile, genre=genre)
 
         return Response(
-            {"message": "Updated succesful."},
+            {"message": "Updated successfully."},
             status=status.HTTP_200_OK,
         )
+

@@ -130,10 +130,28 @@ class Content(models.Model):
     )
     trailer_url = models.URLField(null=True, blank=True)
     synopsis = models.TextField()
-    director_name = models.CharField(max_length=100)
+    directors = models.ManyToManyField('Director', through='ContentDirector')
 
     def __str__(self):
         return self.title
+
+    
+
+class Director(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+
+    def __str__(self):
+        return self.name
+
+class ContentDirector(models.Model):
+    content = models.ForeignKey(Content, on_delete=models.CASCADE)
+    director = models.ForeignKey(Director, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('content', 'director')
+
+    def __str__(self):
+        return f"{self.director.name} - {self.content.title}"
 
 
 # ContentGenres Model

@@ -24,7 +24,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/registration/', include('registration.urls')),
     path('api/v1/content/', include('content.urls')),
-    path('movie/', Movies.movie_link, name='movie_link'), 
+    path('movie/', Movies.movie_link, name='movie_link'),
+    path('api/v1/user/', include('user.urls')), 
 ]
 
 if settings.DEBUG:  
