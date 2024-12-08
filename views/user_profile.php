@@ -147,7 +147,7 @@
         }
 
         try {
-            const response = await fetch('http://localhost:8000/api/v1/token/refresh/', {
+            const response = await fetch('http://localhost:8000/api/v1/registration/token/refresh/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -224,32 +224,33 @@
         let currentBio = '';
         let userGenres = [];
 
-        const loadUserGenres = async () => {
+
+        async function loadUserGenres() {
             try {
-                //Можливо потрібно замінити посилання
-                const response = await fetchWithToken('http://localhost:8000/api/v1/user/profile/');
-                if(response.ok){
-                    const genres = await response.json();
-                    preferencesContainer.innerHTML = genres.length > 0
-                        ? genres.map(genre => `<span class="tag">${genre.name}</span>`).join('')
-                        : '<div class="empty_preferences">Choose the genres you like on the edit form</div>';
+                const response = await fetchWithToken('http://localhost:8000/api/v1/registration/user/profile/');
+                if (response.ok) {
+                    const data = await response.json();
+                    userGenres = data.genres.map(genre => genre.id);
+                    preferencesContainer.innerHTML = userGenres.length > 0 ?
+                        data.genres.map(genre => `<span class="tag">${genre.name}</span>`).join('') :
+                        '<div class="empty_preferences">Choose the genres you like on the edit form</div>';
                 } else {
-                    console.error("Error fetching genres:", error);
+                    console.error("Error fetching user genres:", response.status);
                 }
             } catch (error) {
                 console.error('Error fetching genres:', error);
             }
-        };
+        }
 
         const loadRecommendations = async () => {
             try {
                 //Можливо потрібно замінити посилання
-                const response = await fetchWithToken('http://localhost:8000/api/v1/user/profile/');
-                if(response.ok){
+                const response = await fetchWithToken('http://localhost:8000/api/v1/registration/user/profile/');
+                if (response.ok) {
                     const recommendations = await response.json();
-                    recommendationsContainer.innerHTML = recommendations.length > 0
-                        ? renderMediaList(recommendations)
-                        : '<div class="empty_recommendations">Choose the genres you like on the edit form</div>';
+                    recommendationsContainer.innerHTML = recommendations.length > 0 ?
+                        renderMediaList(recommendations) :
+                        '<div class="empty_recommendations">Choose the genres you like on the edit form</div>';
                 } else {
                     console.error("Error fetching recommendations:", error);
                 }
@@ -261,12 +262,12 @@
         const loadSaved = async () => {
             try {
                 //Можливо потрібно замінити посилання
-                const response = await fetchWithToken('http://localhost:8000/api/v1/user/profile/');
-                if(response.ok){
+                const response = await fetchWithToken('http://localhost:8000/api/v1/registration/user/profile/');
+                if (response.ok) {
                     const saved = await response.json();
-                    savedContainer.innerHTML = saved.length > 0
-                        ? renderMediaList(saved)
-                        : '<div class="empty_saved">You have not saved anything yet</div>';
+                    savedContainer.innerHTML = saved.length > 0 ?
+                        renderMediaList(saved) :
+                        '<div class="empty_saved">You have not saved anything yet</div>';
                 } else {
                     console.error("Error fetching saved movies:", error);
                 }
@@ -277,15 +278,14 @@
 
         const loadHistory = async () => {
             try {
-                //Можливо потрібно замінити посилання
-                const response = await fetchWithToken('http://localhost:8000/api/v1/user/profile/');
-                if(response.ok){
+                const response = await fetchWithToken('http://localhost:8000/api/v1/user/history/');
+                if (response.ok) {
                     const history = await response.json();
-                    historyContainer.innerHTML = history.length > 0
-                        ? renderMediaList(history)
+                    historyContainer.innerHTML = history.length > 0 ?
+                        renderMediaList(history) 
                         : '<div class="empty_history">You have not watched anything yet</div>';
                 } else {
-                    console.error("Error fetching history:", error);
+                    console.error("Error fetching history:", response.statusText);
                 }
             } catch (error) {
                 console.error('Error fetching history:', error);
@@ -305,6 +305,32 @@
             `;
         };
 
+        const addToHistory = async (contentId) => {
+            const payload = {
+                content_id: contentId
+            };
+            try {
+                const response = await fetchWithToken('http://localhost:8000/api/v1/registration/user/add-history/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                if (response.ok) {
+                    console.log('Content added to history successfully');
+                } else {
+                    const errorData = await response.json();
+                    console.error('Error adding to history:', errorData);
+                }
+            } catch (error) {
+                console.error('Error adding to history:', error);
+            }
+        };
+
+
+
         savedToggle.addEventListener("click", async () => {
             savedForm.classList.remove("hidden");
             await loadSavedMovies();
@@ -316,18 +342,17 @@
 
         async function loadSavedMovies() {
             try {
-                //Можливо потрібно замінити посилання
-                const response = await fetchWithToken('http://localhost:8000/api/v1/user/profile/');
-                if(response.ok){
+                const response = await fetchWithToken('http://localhost:8000/api/v1/registration/user/profile/');
+                if (response.ok) {
                     const savedMovies = await response.json();
-                    savedList.innerHTML = savedMovies.length > 0
-                        ? savedMovies.map(movie => `
+                    savedList.innerHTML = savedMovies.length > 0 ?
+                        savedMovies.map(movie => `
                             <a href="content_viewer.php" class="media_item">
                                 <img class="media" src="${movie.content_picture}" alt="${movie.title}">
                                 <div class="media_title">${movie.title}</div>
                             </a>
-                        `).join('')
-                        : '<div class="empty_saved_form">No saved movies yet.</div>';
+                        `).join('') :
+                        '<div class="empty_saved_form">No saved movies yet.</div>';
                 } else {
                     console.error("Error fetching saved movies:", error);
                 }
@@ -338,9 +363,8 @@
 
         async function loadAllGenres() {
             try {
-                //Можливо потрібно замінити посилання
-                const response = await fetchWithToken('http://localhost:8000/api/v1/genres/');
-                if(response.ok){
+                const response = await fetchWithToken('http://localhost:8000/api/v1/registration/genres/');
+                if (response.ok) {
                     const data = await response.json();
                     return data;
                 } else {
@@ -354,16 +378,17 @@
 
         async function populateGenres() {
             const genres = await loadAllGenres();
+            genresContainer.innerHTML = '';
             genres.forEach(genre => {
                 const tag = document.createElement('span');
                 tag.classList.add('tag');
-                tag.textContent = genre,name;
+                tag.textContent = genre.name;
                 tag.dataset.genre = genre.id;
 
-                if(userGenres.includes(genre.id)){
+                if (userGenres.includes(genre.id)) {
                     tag.classList.add('selected');
                 }
-                
+
                 tag.addEventListener('click', () => {
                     tag.classList.toggle('selected');
                 });
@@ -376,8 +401,7 @@
             let accessToken = localStorage.getItem('access_token');
 
             try {
-                //Можливо потрібно замінити посилання
-                const response = await fetchWithToken('http://localhost:8000/api/v1/user/profile/', {
+                const response = await fetchWithToken('http://localhost:8000/api/v1/registration/user/profile/', {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${accessToken}`,
@@ -397,27 +421,34 @@
 
         function getSelectedGenres() {
             const selectedTags = document.querySelectorAll('.tag.selected');
-            return Array.from(selectedTags).map(tag => tag.dataset.genre);
+            return Array.from(selectedTags)
+                .map(tag => parseInt(tag.dataset.genre, 10))
+                .filter(Number.isInteger);
         }
 
         async function saveGenres() {
             const selectedGenres = getSelectedGenres();
+            const payload = {
+                genre_ids: selectedGenres
+            };
             const accessToken = localStorage.getItem('access_token');
 
             try {
-                //Можливо потрібно замінити посилання
-                const response = await fetchWithToken('http://localhost:8000/api/v1/update-user-genres/', {
-                    method: 'PATCH',
+                const response = await fetchWithToken('http://localhost:8000/api/v1/registration/update-user-genres/', {
+                    method: 'PUT',
                     headers: {
+                        'Content-Type': 'application/json',
                         'Authorization': `Bearer ${accessToken}`,
                     },
-                    body: JSON.stringify({genres: selectedGenres}),
+                    body: JSON.stringify(payload),
                 });
 
                 if (response.ok) {
                     console.log('Genres saved successfully');
+                    userGenres = selectedGenres;
                 } else {
-                    console.error('Error saving genres:', data);
+                    const errorData = await response.json();
+                    console.error('Error saving genres:', errorData);
                 }
             } catch (error) {
                 console.error("Error saving genres:", error);
@@ -428,7 +459,7 @@
             let accessToken = localStorage.getItem('access_token');
 
             try {
-                const response = await fetchWithToken('http://localhost:8000/api/v1/user/profile/', {
+                const response = await fetchWithToken('http://localhost:8000/api/v1/registration/user/profile/', {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${accessToken}`,
@@ -463,7 +494,7 @@
             const accessToken = localStorage.getItem('access_token');
 
             try {
-                const response = await fetchWithToken('http://localhost:8000/api/v1/user/profile/', {
+                const response = await fetchWithToken('http://localhost:8000/api/v1/registration/user/profile/', {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${accessToken}`,
@@ -480,7 +511,7 @@
                     aboutInput.value = currentBio;
                     if (data.profile_picture) {
                         formImage.src = `${backendUrl}${data.profile_picture}`;
-                        // Если нужно создавать объект URL из файла изображения:
+
                         fetch(`${backendUrl}${data.profile_picture}`)
                             .then(res => res.blob())
                             .then(imgBlob => {
@@ -529,7 +560,7 @@
             const accessToken = localStorage.getItem('access_token');
 
             try {
-                const response = await fetchWithToken('http://localhost:8000/api/v1/user/profile/edit/', {
+                const response = await fetchWithToken('http://localhost:8000/api/v1/registration/user/profile/edit/', {
                     method: 'PATCH',
                     headers: {
                         'Authorization': `Bearer ${accessToken}`,
@@ -636,6 +667,11 @@
         loadRecommendations();
         loadSaved();
         loadHistory();
+    });
+
+    document.addEventListener("DOMContentLoaded", async function() {
+        await loadUserGenres();
+        await populateGenres();
     });
 </script>
 </html>

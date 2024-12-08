@@ -12,7 +12,7 @@
 
             if(accessToken) {
                 try {
-                    const response = await fetch('http://<?php echo getenv('SERVER_ADDRESS'); ?>/api/v1/user/profile/', {
+                    const response = await fetch('http://localhost:8000/api/v1/registration/user/profile/', {
                         method: 'GET',
                         headers: {
                             'Authorization': `Bearer ${accessToken}`,
