@@ -77,20 +77,159 @@
                 </video>
             </div>
 
-            <div class="comment-section">
-                <div class="comment-input-container">
-                    <input type="text" class="comment-input" placeholder="Add a comment...">
-                    <button><img class="img_send_button" src="../styles/images/send.png" alt="Send Image"></button>
+            <!---------------->
+            <div class="line"></div>
+                
+                <div class="movie-rating">
+                    <h3>Please rate your impressions after watching:</h3>
+                    <div class="stars" data-rating="0">
+                        <span class="star" data-value="1">&#9734;</span>
+                        <span class="star" data-value="2">&#9734;</span>
+                        <span class="star" data-value="3">&#9734;</span>
+                        <span class="star" data-value="4">&#9734;</span>
+                        <span class="star" data-value="5">&#9734;</span>
+                    </div>
+                    
                 </div>
 
-                <div class="comment">
-                    <img class="img_account" src="../styles/images/account.png" alt="Account Image">
-                    <div class="comment-content">
-                        <strong>Nickname</strong>
-                        <p>Sample comment text.</p>
+                <div class="line"></div>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                    const stars = document.querySelectorAll(".stars .star");
+                    const starsContainer = document.querySelector(".stars");
+
+                    stars.forEach((star) => {
+                        star.addEventListener("mouseover", () => {
+                        const value = parseFloat(star.getAttribute("data-value"));
+                        highlightStars(value);
+                    });
+
+                    star.addEventListener("mouseout", () => {
+                    const currentRating = parseFloat(star.parentElement.getAttribute("data-rating"));
+                    highlightStars(currentRating);
+                    });
+
+                    star.addEventListener("click", () => {
+                    const value = parseFloat(star.getAttribute("data-value"));
+                    starsContainer.setAttribute("data-rating", value);
+                    highlightStars(value);
+
+                    // Відправка рейтингу на бекенд після кліку на зірочку
+                    const rating = parseFloat(starsContainer.getAttribute("data-rating"));
+
+                    if (rating > 0) {
+                        fetch('/submit-rating', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ rating: rating }),
+                    })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        console.log('Рейтинг успішно відправлено:', data);
+                    })
+                    .catch((error) => {
+                        console.error('Помилка при відправці рейтингу:', error);
+                     });
+                    } else {
+                    alert('Please determine the rating before submitting.');
+                    }
+                });
+            });
+
+                function highlightStars(value) {
+                    stars.forEach((star) => {
+                        star.classList.toggle("filled", parseFloat(star.getAttribute("data-value")) <= value);
+                    });
+                }
+            });
+            </script>
+
+            <h3>Share your thoughts after watching:</h3>
+                <div class="comment-section">
+                    <div class="comment-input-container">
+                        <input type="text" class="comment-input" placeholder="Add a comment...">
+                        <button id="submit-comment"><img class="img_send_button" src="../styles/images/send.png" alt="Send Image"></buttonм>
                     </div>
                 </div>
-            </div>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        const submitButton = document.getElementById("submit-comment");
+                        const commentInput = document.querySelector(".comment-input");
+
+                        submitButton.addEventListener("click", () => {
+                            const comment = commentInput.value.trim(); // Отримуємо коментар
+
+                            if (comment !== "") {
+                                // Відправка коментаря на бекенд
+                                fetch('/submit-comment', {
+                                method: 'POST',
+                                headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ comment: comment }),
+                            })
+                            .then((response) => response.json())
+                            .then((data) => {
+                                console.log('Коментар успішно відправлено:', data);
+                                 // Очистити поле вводу після відправки
+                                commentInput.value = '';
+                            })
+                            .catch((error) => {
+                                console.error('Помилка при відправці коментаря:', error);
+                            });
+                            } else {
+                                alert('Please write a comment before submitting.');
+                            }
+                        });
+                    });
+                </script>
+
+                <div class="line"></div>
+
+                <h3>View comments:</h3>
+                <div class="comment">
+                    <div id="comments-container">
+                        <!-- Коментарі будуть додаватися сюди -->
+                    </div>
+                </div>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        const commentsContainer = document.getElementById('comments-container');
+
+                    // Функція для отримання коментарів з бекенду
+                    function fetchComments() {
+                        fetch('/get-comments')
+                        .then(response => response.json())
+                        .then(data => {
+                        // Очищаємо контейнер перед додаванням нових коментарів
+                        commentsContainer.innerHTML = '';
+
+                        // Для кожного коментаря створюємо HTML елементи
+                        data.forEach(comment => {
+                            const commentBlock = document.createElement('div');
+                            commentBlock.classList.add('comment');
+
+                            commentBlock.innerHTML = `
+                            <div class="comment-content">
+                                <strong>${comment.nickname}</strong>
+                                <p>${comment.comment}</p>
+                            </div>
+                            `;
+
+                            commentsContainer.appendChild(commentBlock);
+                            });
+                    })
+                        .catch(error => {
+                            console.error('Помилка при отриманні коментарів:', error);
+                        });
+                    }
+
+                // Отримуємо коментарі при завантаженні сторінки
+                fetchComments();
+                });
+                </script>
         </div>
     </div>
 

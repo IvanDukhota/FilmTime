@@ -207,9 +207,10 @@ body {
     font-size: 18px;
     font-weight: 400;
     height: 100%;
-    width: 100%;
+    width: 96%; /*оновлено*/
     background-color: #1E2A38;
     border: none;
+    outline: none; /*додано*/
 }
 
 .comment-input::placeholder {
@@ -257,4 +258,39 @@ body {
     word-wrap: break-word;
     overflow-wrap: break-word;
     white-space: normal;
+}
+
+/* _________________________________________________________ */
+
+h3{
+    font-family: 'Roboto', sans-serif;
+    font-size: 24px;
+    text-align: center;
+}
+
+.movie-rating {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.stars {
+    display: inline-flex;
+    cursor: pointer;
+}
+
+.star {
+    font-size: 4rem;
+    color: gray;
+    transition: color 0.3s;
+}
+
+.star.filled {
+    color: rgb(255, 231, 96);
+}
+
+.line {
+    margin: 20px auto; 
+    width: 90%;        
+    height: 2px;       
+    background-color:rgba(26, 36, 48, 1); 
 }
