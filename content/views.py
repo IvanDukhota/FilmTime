@@ -27,11 +27,11 @@ class MovieDetailView(APIView):
     def get(self, request, content_id):
         try:
             content = Content.objects.get(id=content_id)
-            serializer = ContentSerializer(content)
+            serializer = ContentSerializer(content, context={'request': request})
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Content.DoesNotExist:
             return Response({"error": "Content not found"}, status=status.HTTP_404_NOT_FOUND)
-        
+
 
 class ContentViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Content.objects.all()

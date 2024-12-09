@@ -102,12 +102,12 @@ class DirectorSerializer(serializers.ModelSerializer):
 
 
 class ContentSerializer(serializers.ModelSerializer):
-
     genres = serializers.SerializerMethodField()
     actors = serializers.SerializerMethodField()
     directors = serializers.SerializerMethodField()
     movie = MovieSerializer(read_only=True) 
     series = SeriesSerializer(read_only=True)  
+    cover_image = serializers.SerializerMethodField()
 
     class Meta:
         model = Content
@@ -123,19 +123,23 @@ class ContentSerializer(serializers.ModelSerializer):
             "actors",  
             "movie",  
             "series",  
+            "cover_image",
         ]
 
     def get_genres(self, obj):
-
         genres = Genre.objects.filter(contentgenres__content=obj)
         return GenreSerializer(genres, many=True).data
 
     def get_actors(self, obj):
-
         actors = Actor.objects.filter(contentactor__content=obj)
         return ActorSerializer(actors, many=True).data
 
     def get_directors(self, obj):
-
         directors = Director.objects.filter(contentdirector__content=obj)
         return DirectorSerializer(directors, many=True).data
+
+    def get_cover_image(self, obj):
+        request = self.context.get('request')
+        if obj.cover_image and hasattr(obj.cover_image, 'url'):
+            return request.build_absolute_uri(obj.cover_image.url)
+        return None
