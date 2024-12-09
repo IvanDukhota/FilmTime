@@ -180,7 +180,7 @@ class Command(BaseCommand):
             safe_title = re.sub(r'[<>:"/\\|?*]', '_', title).replace(' ', '_')
             if not safe_title.endswith('.jpg'):
                 safe_title += '.jpg'
-            path = os.path.join(f'media/{folder}', safe_title)
+            path = os.path.join(f'{folder}', safe_title)
             os.makedirs(os.path.dirname(path), exist_ok=True)
         except Exception as e:
             self.stdout.write(f"Помилка створення каталогу для {title}. Шлях: {path}. Помилка: {str(e)}")
@@ -198,7 +198,7 @@ class Command(BaseCommand):
 
 
     def get_trailer_and_save(self, content_id, content_type, title):
-        file_path = os.path.join('media/trailers', f"{title.replace(' ', '_')}_trailer.mp4")
+        file_path = os.path.join('trailers', f"{title.replace(' ', '_')}_trailer.mp4")
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
         try:
