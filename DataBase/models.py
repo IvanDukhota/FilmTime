@@ -121,6 +121,11 @@ class UserGenres(models.Model):
         return f"{self.userprofile} - {self.genre}"
 
 
+def unique_upload_path_content(instance, filename):
+    ext = filename.split(".")[-1]
+    filename = f"{uuid4()}.{ext}"
+    return os.path.join("covers", filename)
+
 # Content Model
 class Content(models.Model):
     title = models.CharField(max_length=255)
@@ -131,11 +136,12 @@ class Content(models.Model):
     trailer_url = models.URLField(null=True, blank=True)
     synopsis = models.TextField()
     directors = models.ManyToManyField('Director', through='ContentDirector')
-
+    cover_image = models.ImageField(
+        upload_to=unique_upload_path, null=True, blank=True
+    )
     def __str__(self):
         return self.title
 
-    
 
 class Director(models.Model):
     name = models.CharField(max_length=255, unique=True)
@@ -253,17 +259,22 @@ class ContentActor(models.Model):
         return f"{self.actor.name} as {self.character_name} in {self.content.title}"
 
 
-# ContentList Model
-class ContentList(models.Model):
+# List Model
+class List(models.Model):
     userprofile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
-    content = models.ForeignKey(Content, on_delete=models.CASCADE)
-    list_name = models.CharField(
-        max_length=50, choices=[("watchlist", "Watchlist"), ("favorites", "Favorites")]
-    )
+    list_name = models.CharField(max_length=50)
     create_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return (
-            f"{self.list_name} - {self.content.title} for {self.userprofile.username}"
-        )
+        return f"{self.list_name} for {self.userprofile.username}"
+
+
+# ContentList Model
+class ContentList(models.Model):
+    list = models.ForeignKey(List, on_delete=models.CASCADE, related_name="contents")
+    content = models.ForeignKey(Content, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.list.list_name} - {self.content.title}"
+
 
