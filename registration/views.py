@@ -301,7 +301,7 @@ class UserProfileView(APIView):
             "bio": user_profile.bio,
             "status": user_profile.status,
             "genres": [
-                {"id": ug.genre.id, "name": ug.genre.name} for ug in user_genres
+                {"id": ug.genre.id, "name": ug.genre.name} for ug in user_genres # type: ignore
             ], 
         }
 
