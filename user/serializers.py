@@ -10,7 +10,7 @@ from DataBase.models import UserProfileContentInfo
 class UserHistorySerializer(serializers.ModelSerializer):
     content_title = serializers.CharField(source="content.title", read_only=True)
     content_id = serializers.IntegerField(source="content.id", read_only=True)
-    
+    cover_image = serializers.SerializerMethodField()
     class Meta:
         model = UserProfileContentInfo
         fields = [
@@ -23,6 +23,7 @@ class UserHistorySerializer(serializers.ModelSerializer):
             "content_title",  
             "comment",
             "comment_date",
+            "cover_image"
         ]
         read_only_fields = [
             "id",
@@ -43,3 +44,11 @@ class UserHistorySerializer(serializers.ModelSerializer):
         if value is not None and len(value) > 500:
             raise serializers.ValidationError("Комментарий не может превышать 500 символов.")
         return value
+
+    def get_cover_image(self, obj):
+        request = self.context.get('request')
+        if obj.content and obj.content.cover_image:
+            if hasattr(obj.content.cover_image, 'url'):
+                return request.build_absolute_uri(obj.content.cover_image.url)
+        return None
+
