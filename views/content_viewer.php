@@ -69,6 +69,38 @@
             </div>
         </div>
 
+        <div class="form_overlay hidden" id="savedForm">
+            <div class="form_container">
+                <div class="form_header">
+                    <button class="create_list_button" id="createListButton">
+                        <img class="create_list_img" src="../styles/images/add.png" alt="CreateList">
+                        Create a new list
+                    </button>
+                    <button id="closeSavedForm">
+                        <img class="saved_close_img" src="../styles/images/close.png" alt="Close">
+                    </button>
+                </div>
+                <div class="saved_list" id="savedList"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form_overlay hidden" id="createListForm">
+            <div class="form_container">
+                <div class="form_header">
+                    <h3>Create a New List</h3>
+                </div>
+                <div class="field_wrapper">
+                    <input type="text" name="listName" class="input_field" placeholder="" id="listName" required>
+                    <label for="listName" class="label_text">List name</label>
+                </div>
+                <div class="form_footer">
+                    <button id="cancelCreateList">Cancel</button>
+                    <button id="createListSubmit">Create</button>
+                </div>
+            </div>
+        </div>
+
         <div class="main-content">
             <div class="video-player">
                 <video controls width="100%">
@@ -238,16 +270,135 @@
     <script>
         document.addEventListener("DOMContentLoaded", async function () {
             let hasRecordedView = false;
+            const urlParams = new URLSearchParams(window.location.search);
+            const movieId = urlParams.get("id");
+            const savedForm = document.getElementById("savedForm");
+            const createListForm = document.getElementById("createListForm");
+            const closeSavedForm = document.getElementById("closeSavedForm");
+            const createListButton = document.getElementById("createListButton");
+            const cancelCreateList = document.getElementById("cancelCreateList");
+            const createListSubmit = document.getElementById("createListSubmit");
+            const savedButton = document.querySelector(".save-button");
+            const savedListContainer = document.getElementById("savedList");
+
+            if (movieId) {
+                await loadMovieData(movieId);
+            } else {
+                console.error("ID not found in URL");
+            }
+
+            savedButton.addEventListener("click", () => {
+                savedForm.classList.remove("hidden");
+                loadSavedLists();
+            });
+
+            closeSavedForm.addEventListener("click", () => {
+                savedForm.classList.add("hidden");
+            });
+
+            createListButton.addEventListener("click", () => {
+                createListForm.classList.remove("hidden");
+            });
+
+            cancelCreateList.addEventListener("click", () => {
+                createListForm.classList.add("hidden");
+            });
+
+            createListSubmit.addEventListener("click", async () => {
+                const listName = document.getElementById("listName").value.trim();
+                if(listName) {
+                    try {
+                        const response = await fetch("http://localhost:8000/api/v1/content-list/", {
+                            method: "POST",
+                            headers: {
+                                Authorization: `Bearer ${accessToken}`,
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({ name: listName }),
+                        });
+
+                        if(response.ok) {
+                            alert("List created successfully!");
+                            createListForm.classList.add("hidden");
+                            loadSavedLists();
+                        } else {
+                            console.error('Error creating list:', error);
+                        }
+                    } catch (error) {
+                        console.error('Error creating list:', error);
+                    }
+                } else {
+                    alert("Please enter a valid list name.")
+                }
+            });
+
+            async function loadSavedLists() {
+                const savedListContainer = document.getElementById("savedList");
+                try {
+                    const response = await fetch("http://localhost:8000/api/v1/content-list/");
+
+                    if(response.ok) {
+                        const lists = await response.json();
+                        savedListContainer.innerHTML = lists.length > 0 ?
+                        lists.map((list) => `
+                            <div class="list_item" data-id="${list.id}">
+                                <img class="list_img" src="../styles/images/open-folder.png" alt="List">
+                                ${list.name}
+                            </div>`
+                        ).join(""):
+                        '<div class="empty_saved_form">No created lists yet.</div>';
+                    } else {
+                        console.error('Error loading lists:', error);
+                    }
+                } catch (error) {
+                    console.error('Error loading lists:', error);
+                }
+            }
+
+            savedListContainer.addEventListener("click", async (event) => {
+                const clickedElement = event.target.closest(".list_item");
+                if (clickedElement) {
+                    const listId = clickedElement.getAttribute("data-id");
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const movieId = urlParams.get("id");
+
+                    if (movieId && listId) {
+                        try {
+                            const accessToken = localStorage.getItem("access_token");
+                            const response = await fetch("http://localhost:8000/api/v1/content-list/", {
+                                method: "POST",
+                                headers: {
+                                    Authorization: `Bearer ${accessToken}`,
+                                    "Content-Type": "application/json",
+                                },
+                                body: JSON.stringify({
+                                    movie_id: movieId,
+                                    list_id: listId,
+                                }),
+                            });
+
+                            if (response.ok) {
+                                alert("Movie successfully added to the list!");
+                            } else {
+                                const errorData = await response.json();
+                                console.error("Error adding movie to list:", errorData);
+                            }
+                        } catch (error) {
+                            console.error("Error during request:", error);
+                        }
+                    }
+                }
+            });
 
             // Watching History
-            const recordMovieView = async () => {
+            const recordMovieView = async (id) => {
                 if (!hasRecordedView) {
                     const accessToken = localStorage.getItem("access_token");
                     const contentId = 1; 
 
                     if (accessToken) {
                         try {
-                            const response = await fetch(`http://localhost:8000/api/v1/content/movie/${contentId}/record-view/`, {
+                            const response = await fetch(`http://localhost:8000/api/v1/content/movie/${id}/record-view/`, {
                                 method: "POST",
                                 headers: {
                                     Authorization: `Bearer ${accessToken}`,
@@ -270,9 +421,9 @@
                 }
             };
 
-            const loadMovieData = async () => {
+            const loadMovieData = async (id) => {
                 try {
-                    const response = await fetch("http://localhost:8000/api/v1/content/movie/1/");
+                    const response = await fetch(`http://localhost:8000/api/v1/content/movie/${id}/`);
                     if (response.ok) {
                         const data = await response.json();
 
@@ -316,8 +467,7 @@
                         const videoPlayer = document.querySelector("video");
                         videoPlayer.load();
 
-                   
-                        videoPlayer.addEventListener("play", recordMovieView);
+                        videoPlayer.addEventListener("play", recordMovieView(id));
                     } else {
                         console.error("Failed to load movie data:", response.status);
                     }

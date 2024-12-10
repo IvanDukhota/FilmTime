@@ -112,11 +112,46 @@
                 <div class="form_overlay hidden" id="savedForm">
                     <div class="form_container">
                         <div class="form_header">
+                            <button class="create_list_button" id="createListButton">
+                                <img class="create_list_img" src="../styles/images/add.png" alt="CreateList">
+                                Create a new list
+                            </button>
                             <button id="closeSavedForm">
                                 <img class="saved_close_img" src="../styles/images/close.png" alt="Close">
                             </button>
                         </div>
                         <div class="saved_list" id="savedList"></div>
+                    </div>
+                </div>
+
+                <div class="form_overlay hidden" id="listForm">
+                    <div class="form_container">
+                        <div class="form_header">
+                            <button id="deleteList">
+                                <img class="delete_list_img" src="../styles/images/delete.png" alt="Delete">
+                                Delete this list
+                            </button>
+                            <button id="closeListForm">
+                                <img class="saved_close_img" src="../styles/images/close.png" alt="Close">
+                            </button>
+                        </div>
+                        <div class="saved_media" id="savedMedia"></div>
+                    </div>
+                </div>
+
+                <div class="form_overlay hidden" id="createListForm">
+                    <div class="form_container">
+                        <div class="form_header">
+                            <h3>Create a New List</h3>
+                        </div>
+                        <div class="field_wrapper">
+                            <input type="text" name="listName" class="input_field" placeholder="" id="listName" required>
+                            <label for="listName" class="label_text">List name</label>
+                        </div>
+                        <div class="form_footer">
+                            <button id="cancelCreateList">Cancel</button>
+                            <button id="createListSubmit">Create</button>
+                        </div>
                     </div>
                 </div>
                 <div class="empty_text"></div>
@@ -200,7 +235,7 @@
         return fetchData();
     };
 
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", async function() {
         const editButton = document.querySelector(".edit_button");
         const cancelButton = document.querySelector("#cancelButton");
         const editForm = document.querySelector("#editForm");
@@ -216,7 +251,12 @@
         const savedToggle = document.getElementById("savedToggle");
         const savedForm = document.getElementById("savedForm");
         const closeSavedForm = document.getElementById("closeSavedForm");
-        const savedList = document.getElementById("savedList");
+        const listForm = document.getElementById("listForm");
+        const createListForm = document.getElementById("createListForm");
+        const closeListForm = document.getElementById("closeListForm");
+        const createListButton = document.getElementById("createListButton");
+        const cancelCreateList = document.getElementById("cancelCreateList");
+        const createListSubmit = document.getElementById("createListSubmit");
         const genresContainer = document.getElementById('genres');
         let userPicture = "../styles/images/account.png";
         let currentNickname = "";
@@ -224,10 +264,15 @@
         let currentBio = '';
         let userGenres = [];
 
-
         async function loadUserGenres() {
             try {
-                const response = await fetchWithToken('http://localhost:8000/api/v1/registration/user/profile/');
+                const response = await fetchWithToken('http://localhost:8000/api/v1/registration/user/profile/', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                    },
+                });
+
                 if (response.ok) {
                     const data = await response.json();
                     userGenres = data.genres.map(genre => genre.id);
@@ -329,25 +374,138 @@
             }
         };
 
-
-
         savedToggle.addEventListener("click", async () => {
             savedForm.classList.remove("hidden");
-            await loadSavedMovies();
+            loadSavedLists();
         });
 
         closeSavedForm.addEventListener("click", () => {
             savedForm.classList.add("hidden");
         });
 
-        async function loadSavedMovies() {
+        closeSavedForm.addEventListener("click", () => {
+            savedForm.classList.add("hidden");
+        });
+
+        createListButton.addEventListener("click", () => {
+            createListForm.classList.remove("hidden");
+        });
+
+        cancelCreateList.addEventListener("click", () => {
+            createListForm.classList.add("hidden");
+        });
+
+        document.getElementById("savedList").addEventListener("click", async (event) => {
+            const target = event.target.closest(".list_item");
+            if(target) {
+                const listId = target.dataset.id;
+                if(listId) {
+                    savedForm.classList.add("hidden");
+                    listForm.classList.remove("hidden");
+                    await loadSavedMovies(listId);
+                }
+            }
+        });
+
+        document.getElementById("closeListForm").addEventListener("click", () => {
+            listForm.classList.add("hidden");
+            savedForm.classList.remove("hidden");
+        });
+
+        document.getElementById("deleteList").addEventListener("click", async () => {
+            const listId = document.querySelector(".list_item[data-id]").dataset.id;
+            if(listId) {
+                const confirmation = confirm("Are you sure you want to delete this list?");
+                if(confirmation) {
+                    try {
+                        const response = await fetch(`http://localhost:8000/api/v1/content-list/${listId}/`, {
+                            method: "DELETE",
+                            headers: {
+                                Authorization: `Bearer ${accessToken}`,
+                            },
+                        });
+                        if (response.ok) {
+                            alert("List deleted successfully.");
+                            listForm.classList.add("hidden");
+                            savedForm.classList.remove("hidden");
+                            await loadSavedLists(); // Оновлення списку
+                        } else {
+                            console.error("Error deleting list:", error);
+                        }
+                    } catch (error) {
+                        console.error("Error deleting list:", error);
+                    }
+                }
+            } else {
+                console.error("List ID not found.");
+            }
+        });
+
+        createListSubmit.addEventListener("click", async () => {
+            const listName = document.getElementById("listName").value.trim();
+            if(listName) {
+                try {
+                    const response = await fetch("http://localhost:8000/api/v1/content-list/", {
+                        method: "POST",
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ name: listName }),
+                    });
+
+                    if(response.ok) {
+                        alert("List created successfully!");
+                        createListForm.classList.add("hidden");
+                        loadSavedLists();
+                    } else {
+                        console.error('Error creating list:', error);
+                    }
+                } catch (error) {
+                    console.error('Error creating list:', error);
+                }
+            } else {
+                alert("Please enter a valid list name.")
+            }
+        });
+
+        async function loadSavedLists() {
+            const savedListContainer = document.getElementById("savedList");
             try {
-                const response = await fetchWithToken('http://localhost:8000/api/v1/registration/user/profile/');
+                const response = await fetch("http://localhost:8000/api/v1/content-list/");
+
+                if(response.ok) {
+                    const lists = await response.json();
+                    savedListContainer.innerHTML = lists.length > 0 ?
+                    lists.map((list) => `
+                        <div class="list_item" data-id="${list.id}">
+                            <img class="list_img" src="../styles/images/open-folder.png" alt="List">
+                            ${list.name}
+                        </div>`
+                    ).join(""):
+                    '<div class="empty_saved_form">No created lists yet.</div>';
+                } else {
+                    console.error('Error loading lists:', error);
+                }
+            } catch (error) {
+                console.error('Error loading lists:', error);
+            }
+        }
+
+        async function loadSavedMovies(listId) {
+            const savedMediaContainer = document.getElementById("savedMedia");
+            try {
+                const response = await fetchWithToken(`http://localhost:8000/api/v1/registration/user/content-list/${listId}/`, {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                });
                 if (response.ok) {
                     const savedMovies = await response.json();
-                    savedList.innerHTML = savedMovies.length > 0 ?
+                    savedMedia.innerHTML = savedMovies.length > 0 ?
                         savedMovies.map(movie => `
-                            <a href="content_viewer.php" class="media_item">
+                            <a href="content_viewer.php?id=${listId}" class="media_item">
                                 <img class="media" src="${movie.content_picture}" alt="${movie.title}">
                                 <div class="media_title">${movie.title}</div>
                             </a>
@@ -395,28 +553,6 @@
 
                 genresContainer.appendChild(tag);
             });
-        }
-
-        async function loadUserFormGenres() {
-            let accessToken = localStorage.getItem('access_token');
-
-            try {
-                const response = await fetchWithToken('http://localhost:8000/api/v1/registration/user/profile/', {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`,
-                    },
-                });
-
-                if (response && response.ok) {
-                    const data = await response.json();
-                    userGenres = data.genres || [];
-                } else {
-                    console.error('Error fetching user genres:', data);
-                }
-            } catch (error) {
-                console.error('Error fetching user genres:', error);
-            }
         }
 
         function getSelectedGenres() {

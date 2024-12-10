@@ -251,6 +251,10 @@ body {
     outline: none;
 }
 
+#createListForm .input_field {
+    margin-bottom: 14px;
+}
+
 .label_text {
     position: absolute;
     top: -10px;
@@ -428,20 +432,28 @@ body {
 
 .form_header {
     display: flex;
-    flex-direction: row-reverse;
+    justify-content: space-between;
 }
 
 .saved .form_container {
     max-width: 1080px;
-    min-height: 500px;
+    min-width: 500px;
 }
 
 .empty_saved_form {
+    text-align: center;
+    color: #f5f5f5;
+    font-family: 'Roboto', sans-serif;
+    font-size: 24px;
+    font-weight: 400;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     width: 100%;
     height: 429px;
 }
 
-.saved_list {
+.saved_list, .saved_media {
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-start;
@@ -449,16 +461,92 @@ body {
     gap: 20px;
 }
 
+.list_item {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #f5f5f5;
+    font-family: 'Roboto', sans-serif;
+    font-size: 24px;
+    font-weight: 400;
+    cursor: pointer;
+}
+
+.list_img {
+    width: 200px;
+    height: 200px;
+}
+
 .saved_close_img {
     height: 20px;
     width: 20px;
 }
 
-#closeSavedForm {
+#closeSavedForm, #closeListForm {
     background: none;
     border: none;
     padding: 0;
     cursor: pointer;
+}
+
+.form_footer {
+    display: flex;
+    justify-content: space-between;
+}
+
+.create_list_button, #cancelCreateList, #deleteList {
+    color: #f5f5f5;
+    font-family: 'Roboto', sans-serif;
+    font-size: 20px;
+    font-weight: 400;
+    background-color: #182029;
+    border: solid 3px #f5f5f5;
+    border-radius: 16px;
+    white-space: nowrap;
+    height: 56px;
+    width: 213px;
+}
+
+.create_list_button:hover, .create_list_button:active, #cancelCreateList:hover, 
+#cancelCreateList:active, #deleteList:hover, #deleteList:active {
+    background-color: #2A3745;
+    color: #f5f5f5;
+    border-color: #2A3745;
+}
+
+.create_list_img, .delete_list_img {
+    width: 18px;
+    height: 18px;
+}
+
+#createListForm .form_header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#createListForm .form_container {
+    height: 220px;
+}
+
+#createListSubmit {
+    color: #232323;
+    font-family: 'Roboto', sans-serif;
+    font-size: 24px;
+    font-weight: 500;
+    border: solid 3px #AAB1BB;
+    background-color: #AAB1BB;
+    border-radius: 16px;
+    white-space: nowrap;
+    height: 56px;
+    width: 213px;
+}
+
+#createListSubmit:hover, #createListSubmit:active {
+    background-color: #8F959D;
+    color: #464646;
+    border-color: #8F959D;
 }
 
 a {

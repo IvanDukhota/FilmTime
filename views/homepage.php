@@ -57,24 +57,7 @@
                         <img class="arrow_img" src="../styles/images/arrow_white.png" alt="Arrow">
                     </a>
                 </div>
-                <div class="media_list">
-                    <a href="content_viewer.php" class="media_item">
-                        <img class="media" src="../styles/images/shutter island.png" alt="Shutter Island">
-                        <div class="media_title">Shutter Island</div>
-                    </a>
-                    <a href="" class="media_item">
-                        <img class="media" src="../styles/images/Harry_potter.jpg" alt="Harry Potter">
-                        <div class="media_title">Harry Potter and the Philosopher's Stone</div>
-                    </a>
-                    <a href="" class="media_item">
-                        <img class="media" src="../styles/images/Pirates_of_the_caribbean.jpg" alt="Pirates of the Caribbean">
-                        <div class="media_title">Pirates of the Caribbean: The Curse of the Black Pearl</div>
-                    </a>
-                    <a href="" class="media_item">
-                        <img class="media" src="../styles/images/Fear_street.jpg" alt="Fear Street">
-                        <div class="media_title">Fear Street Part One: 1994</div>
-                    </a>
-                </div>
+                <div class="media_list"></div>
             </div>
 
             <div class="tv_shows">
@@ -84,24 +67,7 @@
                         <img class="arrow_img" src="../styles/images/arrow_white.png" alt="Arrow">
                     </a>
                 </div>
-                <div class="media_list">
-                    <a href="" class="media_item">
-                        <img class="media" src="#" alt="Stranger Things">
-                        <div class="media_title">Stranger Things</div>
-                    </a>
-                    <a href="" class="media_item">
-                        <img class="media" src="#" alt="Panic">
-                        <div class="media_title">Panic</div>
-                    </a>
-                    <a href="" class="media_item">
-                        <img class="media" src="#" alt="One Piece">
-                        <div class="media_title">One Piece</div>
-                    </a>
-                    <a href="" class="media_item">
-                        <img class="media" src="#" alt="Bridgerton">
-                        <div class="media_title">Bridgerton</div>
-                    </a>
-                </div>
+                <div class="media_list"></div>
             </div>
 
             <div class="cartoons">
@@ -111,24 +77,7 @@
                         <img class="arrow_img" src="../styles/images/arrow_white.png" alt="Arrow">
                     </a>
                 </div>
-                <div class="media_list">
-                    <a href="" class="media_item">
-                        <img class="media" src="#" alt="Puss in Boots">
-                        <div class="media_title">Puss in Boots</div>
-                    </a>
-                    <a href="" class="media_item">
-                        <img class="media" src="#" alt="Kung Fu Panda">
-                        <div class="media_title">Kung Fu Panda</div>
-                    </a>
-                    <a href="" class="media_item">
-                        <img class="media" src="#" alt="Garfield">
-                        <div class="media_title">Garfield</div>
-                    </a>
-                    <a href="" class="media_item">
-                        <img class="media" src="#" alt="The Simpsons">
-                        <div class="media_title">The Simpsons</div>
-                    </a>
-                </div>
+                <div class="media_list"></div>
             </div>
         </section>
 
@@ -136,4 +85,65 @@
         include('footer.html');
         ?>
     </body>
+    <script>
+        const loadContent = async () => {
+            try {
+                const response = await fetch('http://localhost:8000/api/v1/movie/');
+                if (response.ok) {
+                    const data = await response.json();
+
+                    const moviesContainer = document.querySelector('.movies .media_list');
+                    const tvShowsContainer = document.querySelector('.tv_shows .media_list');
+                    const cartoonsContainer = document.querySelector('.cartoons .media_list');
+
+                    const movies = [];
+                    const tvShows = [];
+                    const cartoons = [];
+
+                    data.forEach((item) => {
+                        if(item.content_type === 'movie' && movies.length < 4){
+                            movies.push(item);
+                        } else if(item.content_type === 'series' && tvShows.length < 4) {
+                            tvShows.push(item);
+                        } else if(item.content_type === 'animation' && cartoons.length < 4){
+                            cartoons.push(item);
+                        }
+                    });
+
+                    const createMediaItem = (items, container) => {
+                        container.innerHTML = "";
+                        items.forEach((item) => {
+                            const mediaItem = document.createElement('a');
+                            mediaItem.href = `content_viewer.html?id=${item.id}`;
+                            mediaItem.classList.add('media_item');
+
+                            const mediaImage = document.createElement('img');
+                            mediaImage.src = item.cover_image || '';
+                            mediaImage.alt = item.title || 'No title';
+                            mediaImage.classList.add('media');
+
+                            const mediaTitle = document.createElement('div');
+                            mediaTitle.textContent = item.title || 'No title';
+                            mediaTitle.classList.add('media_title');
+
+                            mediaItem.appendChild(mediaImage);
+                            mediaItem.appendChild(mediaTitle);
+                            container.appendChild(mediaItem);
+                        });
+                    };
+
+                    createMediaItem(movies, moviesContainer);
+                    createMediaItem(tvShows, tvShowsContainer);
+                    createMediaItem(cartoons, cartoonsContainer);
+                } else {
+                    console.error('Failed to load content:', response.status);
+                }
+            } catch (error) {
+                console.error('Error fetching content:', error);
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', loadContent);
+
+    </script>
 </html>
