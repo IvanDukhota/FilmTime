@@ -54,7 +54,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.is_superuser
 
 
-# Function to upload profile picture
 def unique_upload_path(instance, filename):
     ext = filename.split(".")[-1]
     filename = f"{uuid4()}.{ext}"
@@ -177,8 +176,9 @@ class UserProfileContentInfo(models.Model):
     user_rating = models.IntegerField(null=True, blank=True)
     comment = models.TextField(null=True, blank=True)
     comment_date = models.DateTimeField(null=True, blank=True)
-    movie_progress = models.IntegerField(null=True, blank=True)  # minutes watched
-    episode_progress = models.IntegerField(null=True, blank=True)  # episodes watched
+    movie_progress = models.IntegerField(null=True, blank=True)
+    episode_progress = models.IntegerField(null=True, blank=True)
+    comment_time = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.userprofile} - {self.content}"

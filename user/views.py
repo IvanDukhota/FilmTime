@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status, generics, permissions
 from django.utils import timezone  
 from DataBase.models import UserProfileContentInfo, Content  
-from .serializers import UserHistorySerializer  
+from .serializers import UserHistorySerializer
 
 
 class UserHistoryView(APIView):
@@ -15,11 +15,9 @@ class UserHistoryView(APIView):
         user_profile = request.user.userprofile
         history = UserProfileContentInfo.objects.filter(userprofile=user_profile).select_related('content')
 
-  
-        serializer = UserHistorySerializer(history, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer = UserHistorySerializer(history, many=True, context={'request': request})
 
-    
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class AddToHistoryView(APIView):
     permission_classes = [IsAuthenticated]
