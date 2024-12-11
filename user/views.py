@@ -106,36 +106,36 @@ class GetUserRatingView(generics.RetrieveAPIView):
             return Response({}, status=status.HTTP_404_NOT_FOUND)
         
 
-class SubmitCommentView(generics.UpdateAPIView):
-    serializer_class = UserHistorySerializer
-    permission_classes = [permissions.IsAuthenticated]
-    
-    def patch(self, request, *args, **kwargs):
-        content_id = request.data.get('content_id')
-        comment_text = request.data.get('comment')
-        
-        if content_id is None or comment_text is None:
-            return Response({'error': 'content_id и comment обязательны.'}, status=status.HTTP_400_BAD_REQUEST)
-        
+class SubmitCommentView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request):
+        user_profile = request.user.userprofile
+        content_id = request.data.get("content_id")
+        comment = request.data.get("comment")
+
+        if not content_id:
+            return Response({"error": "Content ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
             content = Content.objects.get(id=content_id)
         except Content.DoesNotExist:
-            return Response({'error': 'Content не найден.'}, status=status.HTTP_404_NOT_FOUND)
-        
-        userprofile = request.user.userprofile
-        
-        user_content_info, created = UserProfileContentInfo.objects.get_or_create(
-            userprofile=userprofile,
-            content=content,
-            defaults={'comment': comment_text}
+            return Response({"error": "Content not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    
+        history_entry, created = UserProfileContentInfo.objects.get_or_create(
+            userprofile=user_profile,
+            content=content
         )
-        
-        if not created:
-            user_content_info.comment = comment_text
-            user_content_info.save()
-        
-        serializer = self.get_serializer(user_content_info)
+
+    
+        history_entry.comment = comment
+        history_entry.comment_date = timezone.now()
+        history_entry.save()
+
+        serializer = UserHistorySerializer(history_entry)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class GetCommentsView(generics.ListAPIView):
     serializer_class = UserHistorySerializer
@@ -144,5 +144,8 @@ class GetCommentsView(generics.ListAPIView):
     def get_queryset(self):
         content_id = self.request.query_params.get('content_id')
         if content_id:
-            return UserProfileContentInfo.objects.filter(content__id=content_id, comment__isnull=False).order_by('-comment_date')
+            return (UserProfileContentInfo.objects
+                    .filter(content__id=content_id, comment__isnull=False)
+                    .select_related('content', 'userprofile')  
+                    .order_by('-comment_date'))
         return UserProfileContentInfo.objects.none()

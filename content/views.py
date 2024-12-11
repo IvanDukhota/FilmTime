@@ -48,8 +48,13 @@ class ContentViewSet(viewsets.ReadOnlyModelViewSet):
         duration = request.query_params.get('duration', None)
         rating = request.query_params.get('rating', None)
         title = request.query_params.get('title', None)
+        
+        id_param = request.query_params.get('id', None)
 
         filters = Q(content_type="movie")
+
+        if id_param:
+            filters &= Q(id=id_param)
 
         if start_year and end_year:
             filters &= Q(release_date__year__gte=start_year) & Q(release_date__year__lte=end_year)
@@ -58,10 +63,8 @@ class ContentViewSet(viewsets.ReadOnlyModelViewSet):
         elif end_year:
             filters &= Q(release_date__year__lte=end_year)
 
-
         if director:
             filters &= Q(directors__name__icontains=director)
-
 
         if actors:
             actor_queries = Q()
@@ -84,6 +87,7 @@ class ContentViewSet(viewsets.ReadOnlyModelViewSet):
         filtered_movies = Content.objects.filter(filters).distinct()
         serializer = self.get_serializer(filtered_movies, many=True)
         return Response(serializer.data)
+    
 
 
 class RecordMovieView(APIView):

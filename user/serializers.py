@@ -10,6 +10,7 @@ from DataBase.models import UserProfileContentInfo
 class UserHistorySerializer(serializers.ModelSerializer):
     content_title = serializers.CharField(source="content.title", read_only=True)
     content_id = serializers.IntegerField(source="content.id", read_only=True)
+    user_name = serializers.CharField(source='userprofile.username', read_only=True)
     cover_image = serializers.SerializerMethodField()
     class Meta:
         model = UserProfileContentInfo
@@ -23,7 +24,8 @@ class UserHistorySerializer(serializers.ModelSerializer):
             "content_title",  
             "comment",
             "comment_date",
-            "cover_image"
+            "cover_image",
+            "user_name",
         ]
         read_only_fields = [
             "id",
@@ -33,13 +35,14 @@ class UserHistorySerializer(serializers.ModelSerializer):
             "content_id",
             "content_title",
             "comment_date",
+            "user_name",
         ]
     
     def validate_user_rating(self, value):
         if value is not None and not (1 <= value <= 5):
             raise serializers.ValidationError("Рейтинг должен быть в диапазоне от 1 до 5.")
         return value
-    
+
     def validate_comment(self, value):
         if value is not None and len(value) > 500:
             raise serializers.ValidationError("Комментарий не может превышать 500 символов.")
