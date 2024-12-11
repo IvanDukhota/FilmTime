@@ -1,0 +1,67 @@
+package com.filmtime;
+
+import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
+
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+import com.filmtime.api.ApiService;
+import com.filmtime.api.AuthInterceptor;
+import com.filmtime.api.RetrofitClient;
+import com.filmtime.model.UserProfileResponse;
+import com.filmtime.util.JwtManager;
+import com.filmtime.util.Util;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class MainActivity extends AppCompatActivity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_main);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+        loginWithStoredToken();
+    }
+    private void loginWithStoredToken() {
+        JwtManager jwtManager = new JwtManager(this);
+        if (!jwtManager.hasAccessToken() && !jwtManager.hasRefreshToken()) {
+            Util.redirectToActivity(this, LoginActivity.class);
+        }
+
+        ApiService apiService = RetrofitClient.getInstance(new AuthInterceptor(this)).create(ApiService.class);
+        apiService.getUserProfile().enqueue(new Callback<UserProfileResponse>() {
+            @Override
+            public void onResponse(Call<UserProfileResponse> call, Response<UserProfileResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Toast.makeText(MainActivity.this, "Login with token successful", Toast.LENGTH_SHORT).show();
+                    Util.redirectToActivity(MainActivity.this, UserProfileActivity.class);
+                } else {
+                    Log.e("API_ERROR", "Error code: " + response.code());
+                    if (response.errorBody() != null) {
+                        Log.e("API_ERROR", "Error: " + response.errorBody());
+                    }
+                    Toast.makeText(MainActivity.this, "Login with token failed", Toast.LENGTH_SHORT).show();
+                    Util.redirectToActivity(MainActivity.this, LoginActivity.class);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UserProfileResponse> call, Throwable t) {
+                Toast.makeText(MainActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Util.redirectToActivity(MainActivity.this, LoginActivity.class);
+            }
+        });
+    }
+}
