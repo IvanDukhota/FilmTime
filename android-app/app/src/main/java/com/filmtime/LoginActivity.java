@@ -43,6 +43,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         Button loginGoogleButton = (Button) findViewById(R.id.buttonLoginGoogle);
         loginGoogleButton.setOnClickListener(this);
+
+        Button signUpButton = (Button) findViewById(R.id.buttonSignUpRedirect);
+        signUpButton.setOnClickListener(this);
     }
 
     public void onClick(View v) {
@@ -61,6 +64,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
             case R.id.buttonLoginGoogle: {
                 //todo: do something
+                break;
+            }
+            case R.id.buttonSignUpRedirect: {
+                Util.redirectToActivity(this, SignUpActivity.class);
                 break;
             }
         }
@@ -83,7 +90,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     if (response.errorBody() != null) {
                         Log.e("API_ERROR", "Error: " + response.errorBody());
                     }
-                    Toast.makeText(LoginActivity.this, "Login failed", Toast.LENGTH_SHORT).show();
+                    if (response.code() == 401) {
+                        Toast.makeText(LoginActivity.this, "Wrong email or password", Toast.LENGTH_SHORT).show();
+                        EditText passwordEditText = (EditText) findViewById(R.id.editTextTextPassword);
+                        passwordEditText.setText("");
+                    }
+                    else {
+                        Toast.makeText(LoginActivity.this, "Login request error", Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
 

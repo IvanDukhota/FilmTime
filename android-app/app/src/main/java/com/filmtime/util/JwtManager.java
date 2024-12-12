@@ -14,8 +14,14 @@ public class JwtManager {
         sharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
     }
 
+    public void deleteAccessToken() {
+        saveAccessToken(null);
+    }
     public void saveAccessToken(String token) {
         saveToken(token, KEY_ACCESS_TOKEN);
+    }
+    public void deleteRefreshToken() {
+        saveRefreshToken(null);
     }
     public void saveRefreshToken(String token) {
         saveToken(token, KEY_REFRESH_TOKEN);
@@ -26,10 +32,12 @@ public class JwtManager {
         editor.apply();
     }
     public boolean hasAccessToken() {
-        return getAccessToken() != null;
+        String token = getAccessToken();
+        return token != null && !token.trim().isEmpty();
     }
     public boolean hasRefreshToken() {
-        return getRefreshToken() != null;
+        String token = getRefreshToken();
+        return token != null && !token.trim().isEmpty();
     }
     public String getAccessToken() {
         return getToken(KEY_ACCESS_TOKEN);

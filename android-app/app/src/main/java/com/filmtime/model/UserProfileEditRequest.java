@@ -1,29 +1,38 @@
 package com.filmtime.model;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-public class UserProfileResponse implements Serializable {
-    public final static String EXTRA_KEY = "user_profile_data";
+public class UserProfileEditRequest implements Serializable {
     private String email;
+    private String password;
     private String username;
     private String country;
     private String bio;
     private byte[] profile_picture;
-    private String role;
-
-    private String status;
-    public UserProfileResponse(String email, String username, String country, String bio,
-                               byte[] profilePicture, String role, String status) {
+    public UserProfileEditRequest(String email, String username, String country, String bio,
+                               byte[] profilePicture, String password) {
         this.email = email;
         this.username = username;
         this.country = country;
         this.bio = bio;
         this.profile_picture = profilePicture;
-        this.role = role;
-        this.status = status;
+        this.password = password;
+    }
+    private void writeObject(ObjectOutputStream oos) throws IOException {
+        oos.defaultWriteObject();
+        oos.writeInt(profile_picture.length);
+        oos.write(profile_picture);
     }
 
-
+    private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+        ois.defaultReadObject();
+        int length = ois.readInt();
+        profile_picture = new byte[length];
+        ois.readFully(profile_picture);
+    }
     public void setEmail(String email) {
         this.email = email;
     }
@@ -44,10 +53,6 @@ public class UserProfileResponse implements Serializable {
         this.profile_picture = profilePicture;
     }
 
-    public void setRole(String role) {
-        this.role = role;
-    }
-
     public String getEmail() {
         return email;
     }
@@ -64,19 +69,15 @@ public class UserProfileResponse implements Serializable {
         return bio;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     public byte[] getProfilePicture() {
         return profile_picture;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
     }
 }

@@ -2,6 +2,11 @@ package com.filmtime;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,14 +14,24 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class UserProfileActivity extends AppCompatActivity {
+import com.filmtime.api.ApiService;
+import com.filmtime.api.AuthInterceptor;
+import com.filmtime.api.RetrofitClient;
+import com.filmtime.model.UserProfileResponse;
+import com.filmtime.util.JwtManager;
+import com.filmtime.util.UserProfileManager;
+import com.filmtime.util.Util;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class UserProfileActivity extends AppCompatActivity implements View.OnClickListener {
+    private UserProfileManager userProfileManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        /*todo: use this to check access tokens
-            Intent intent = getIntent();
-            String value = intent.getStringExtra("key"); */
 
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_user_profile);
@@ -25,5 +40,59 @@ public class UserProfileActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        Button logOutButton = (Button) findViewById(R.id.buttonLogOut);
+        logOutButton.setOnClickListener(this);
+        Button editButton = (Button) findViewById(R.id.buttonEditProfile);
+        editButton.setOnClickListener(this);
+
+        TextView usernameTextView = (TextView) findViewById(R.id.usernameTextView);
+        TextView emailTextView = (TextView) findViewById(R.id.emailTextView);
+        TextView countryTextView = (TextView) findViewById(R.id.countryTextView);
+        TextView bioTextView = (TextView) findViewById(R.id.bioTextView);
+
+        userProfileManager = UserProfileManager.fromIntentExtra(getIntent());
+        if (userProfileManager.isDataNull()) {
+            userProfileManager.fetchUserProfileData(this,
+                    () -> {
+                        if (userProfileManager.isDataNull()) {
+                            Log.e("API_ERROR", "User profile fetch returned null.");
+                            Toast.makeText(UserProfileActivity.this,
+                                    "Error: failed to fetch user profile.", Toast.LENGTH_SHORT).show();
+                            Util.redirectToActivity(UserProfileActivity.this, MainActivity.class);
+                        }
+                        userProfileManager.displayUserProfileData(usernameTextView, emailTextView,
+                                bioTextView, countryTextView);
+                    },
+                    () -> {
+                        Util.redirectToActivity(UserProfileActivity.this, LoginActivity.class);
+                    },
+                    () -> {
+                        Util.redirectToActivity(UserProfileActivity.this, LoginActivity.class);
+                    }
+            );
+        }
+        else {
+            userProfileManager.displayUserProfileData(usernameTextView, emailTextView,
+                    bioTextView, countryTextView);
+        }
+    }
+
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.buttonEditProfile: {
+                Intent intent = new Intent(this, ProfileEditActivity.class);
+                intent.putExtra(UserProfileResponse.EXTRA_KEY, userProfileManager.getUserProfileData());
+                startActivity(intent);
+                break;
+            }
+            case R.id.buttonLogOut: {
+                JwtManager jwtManager = new JwtManager(this);
+                jwtManager.deleteAccessToken();
+                jwtManager.deleteRefreshToken();
+                Util.redirectToActivity(this, LoginActivity.class);
+                break;
+            }
+        }
     }
 }

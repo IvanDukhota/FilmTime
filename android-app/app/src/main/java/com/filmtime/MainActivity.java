@@ -1,5 +1,6 @@
 package com.filmtime;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
         JwtManager jwtManager = new JwtManager(this);
         if (!jwtManager.hasAccessToken() && !jwtManager.hasRefreshToken()) {
             Util.redirectToActivity(this, LoginActivity.class);
+            return;
         }
 
         ApiService apiService = RetrofitClient.getInstance(new AuthInterceptor(this)).create(ApiService.class);
@@ -46,7 +48,9 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<UserProfileResponse> call, Response<UserProfileResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     Toast.makeText(MainActivity.this, "Login with token successful", Toast.LENGTH_SHORT).show();
-                    Util.redirectToActivity(MainActivity.this, UserProfileActivity.class);
+                    Intent intent = new Intent(MainActivity.this, UserProfileActivity.class);
+                    intent.putExtra(UserProfileResponse.EXTRA_KEY, response.body());
+                    MainActivity.this.startActivity(intent);
                 } else {
                     Log.e("API_ERROR", "Error code: " + response.code());
                     if (response.errorBody() != null) {
