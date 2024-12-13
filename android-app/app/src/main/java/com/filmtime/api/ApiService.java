@@ -2,6 +2,7 @@ package com.filmtime.api;
 
 import com.filmtime.model.LoginRequest;
 import com.filmtime.model.LoginResponse;
+import com.filmtime.model.RegisterRequest;
 import com.filmtime.model.UserProfileEditRequest;
 import com.filmtime.model.UserProfileEditResponse;
 import com.filmtime.model.UserProfileResponse;
@@ -15,6 +16,9 @@ import retrofit2.http.PATCH;
 public interface ApiService {
     @POST("/api/v1/login/")
     Call<LoginResponse> login(@Body LoginRequest loginRequest);
+
+    @POST("/api/v1/register/")
+    Call<LoginResponse> signUp(@Body RegisterRequest registerRequest);
 
     @GET("/api/v1/user/profile/")
     Call<UserProfileResponse> getUserProfile();

@@ -85,7 +85,7 @@ public class ProfileEditActivity extends AppCompatActivity implements View.OnCli
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.buttonCancelEdit: {
-                finish();
+                Util.redirectToActivity(this, UserProfileActivity.class);
                 break;
             }
             case R.id.buttonSaveEdited: {
@@ -104,15 +104,13 @@ public class ProfileEditActivity extends AppCompatActivity implements View.OnCli
                         request,
                         () -> {
                             Toast.makeText(this, "Data modified successfully!", Toast.LENGTH_SHORT).show();
-                            finish();
+                            Util.redirectToActivity(this, UserProfileActivity.class);
                         },
                         () -> {
                             Toast.makeText(this, "Data modification error.", Toast.LENGTH_SHORT).show();
-                            finish();
                         },
                         () -> {
                             Toast.makeText(this, "API error.", Toast.LENGTH_SHORT).show();
-                            finish();
                         });
                 break;
             }
@@ -123,11 +121,11 @@ public class ProfileEditActivity extends AppCompatActivity implements View.OnCli
         if (passwordEditText.getText().toString().isEmpty()) {
             changePassword = false;
         }
-        else if (!isValidPassword()) {
+        else if (!Util.validatePasswordInputs(this, passwordEditText, passwordRepeatEditText)) {
             return false;
         }
 
-        if (usernameEditText.getText().length() < 4 || usernameEditText.getText().length() > 32) {
+        if (!Util.isValidUsername(usernameEditText.getText().toString())) {
             Toast.makeText(this, "Username must be between 4 and 32 characters.", Toast.LENGTH_SHORT).show();
             return false;
         }
@@ -139,23 +137,6 @@ public class ProfileEditActivity extends AppCompatActivity implements View.OnCli
 
         if (bioEditText.getText().length() > 255) {
             Toast.makeText(this, "Description must be less than 256 characters.", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-
-        return true;
-    }
-    private boolean isValidPassword() {
-        String password = passwordEditText.getText().toString();
-        String passwordRepeat = passwordRepeatEditText.getText().toString();
-        if (!password.equals(passwordRepeat)) {
-            passwordRepeatEditText.setText("");
-            Toast.makeText(this, "Passwords don't match!", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-
-        if (passwordEditText.getText().length() < 8 || passwordEditText.getText().length() > 32) {
-            passwordRepeatEditText.setText("");
-            Toast.makeText(this, "Password must be between 8 and 32 characters.", Toast.LENGTH_SHORT).show();
             return false;
         }
 
