@@ -6,15 +6,13 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 public class UserProfileEditRequest implements Serializable {
-    private String email;
     private String password;
     private String username;
     private String country;
     private String bio;
     private byte[] profile_picture;
-    public UserProfileEditRequest(String email, String username, String country, String bio,
+    public UserProfileEditRequest(String username, String country, String bio,
                                byte[] profilePicture, String password) {
-        this.email = email;
         this.username = username;
         this.country = country;
         this.bio = bio;
@@ -33,10 +31,6 @@ public class UserProfileEditRequest implements Serializable {
         profile_picture = new byte[length];
         ois.readFully(profile_picture);
     }
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
     public void setUsername(String username) {
         this.username = username;
     }
@@ -51,10 +45,6 @@ public class UserProfileEditRequest implements Serializable {
 
     public void setProfilePicture(byte[] profilePicture) {
         this.profile_picture = profilePicture;
-    }
-
-    public String getEmail() {
-        return email;
     }
 
     public String getUsername() {

@@ -83,7 +83,6 @@ public class UserProfileManager {
             }
             @Override
             public void onFailure(Call<UserProfileEditResponse> call, Throwable t) {
-                Toast.makeText(context, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.e("API_ERROR", "Error: " + t.getMessage());
                 t.printStackTrace();
                 onFailure.run();

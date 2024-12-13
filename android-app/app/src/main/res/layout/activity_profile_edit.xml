@@ -5,73 +5,135 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/rounded_background"
     tools:context=".ProfileEditActivity">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_centerInParent="true"
         android:orientation="vertical"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="0dp">
+        android:padding="16dp">
 
-        <ImageView
-            android:id="@+id/imageViewEditPfp"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            tools:srcCompat="@tools:sample/avatars" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp">
+
+            <ImageView
+                android:id="@+id/pfpImageEdit"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/rounded_background_dark"
+                app:srcCompat="@drawable/account"/>
+
+            <Button
+                android:id="@+id/ButtonPfpEdit"
+                android:layout_width="220dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rounded_button_border"
+                android:backgroundTint="#AAB1BB"
+                android:text="Upload new photo"
+                android:textSize="18dp"
+                android:textColor="@color/white" />
+        </LinearLayout>
+        <EditText
+            android:id="@+id/editTextEmailAddress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Email"
+            android:enabled="false"
+            android:background="@drawable/rounded_edittext_background"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white" />
+        <EditText
+            android:id="@+id/editTextUsername"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Nickname"
+            android:background="@drawable/rounded_edittext_background"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white" />
 
         <EditText
             android:id="@+id/editTextPassword"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="textPassword" />
+            android:hint="Password"
+            android:background="@drawable/rounded_edittext_background"
+            android:inputType="textPassword"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white" />
 
         <EditText
             android:id="@+id/editTextRepeatPassword"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="textPassword" />
-
-        <EditText
-            android:id="@+id/editTextEmailAddress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="textEmailAddress" />
-
-        <EditText
-            android:id="@+id/editTextUsername"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="text" />
+            android:hint="Repeat password"
+            android:background="@drawable/rounded_edittext_background"
+            android:inputType="textPassword"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white" />
 
         <EditText
             android:id="@+id/editTextCountry"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="text" />
+            android:hint="Country"
+            android:background="@drawable/rounded_edittext_background"
+            android:padding="12dp"
+            android:layout_marginBottom="8dp"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white" />
 
         <EditText
             android:id="@+id/editTextBio"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="text" />
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:hint="About Me"
+            android:background="@drawable/rounded_edittext_background"
+            android:gravity="top|start"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white" />
 
-        <Button
-            android:id="@+id/buttonCancelEdit"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Cancel" />
+            android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/buttonSaveEdited"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Save" />
+            <Button
+                android:id="@+id/buttonCancelEdit"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:background="@drawable/rounded_button_border"
+                android:text="Cancel"
+                android:textSize="20dp"
+                android:textColor="@color/white"
+                android:layout_marginEnd="8dp" />
 
+            <Button
+                android:id="@+id/buttonSaveEdited"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:background="@drawable/rounded_button_border"
+                android:backgroundTint="#AAB1BB"
+                android:text="Edit"
+                android:textSize="20dp"
+                android:textColor="@color/white" />
+        </LinearLayout>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

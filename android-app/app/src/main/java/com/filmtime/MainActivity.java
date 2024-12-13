@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<UserProfileResponse> call, Response<UserProfileResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Toast.makeText(MainActivity.this, "Login with token successful", Toast.LENGTH_SHORT).show();
+                    Log.i("AUTH_RESPONSE", "Login with token successful.");
                     Intent intent = new Intent(MainActivity.this, UserProfileActivity.class);
                     intent.putExtra(UserProfileResponse.EXTRA_KEY, response.body());
                     MainActivity.this.startActivity(intent);
@@ -56,14 +56,14 @@ public class MainActivity extends AppCompatActivity {
                     if (response.errorBody() != null) {
                         Log.e("API_ERROR", "Error: " + response.errorBody());
                     }
-                    Toast.makeText(MainActivity.this, "Login with token failed", Toast.LENGTH_SHORT).show();
+                    Log.i("AUTH_RESPONSE", "Login with token failed.");
                     Util.redirectToActivity(MainActivity.this, LoginActivity.class);
                 }
             }
 
             @Override
             public void onFailure(Call<UserProfileResponse> call, Throwable t) {
-                Toast.makeText(MainActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("API_FAILURE", "Error: " + t.getMessage());
                 Util.redirectToActivity(MainActivity.this, LoginActivity.class);
             }
         });

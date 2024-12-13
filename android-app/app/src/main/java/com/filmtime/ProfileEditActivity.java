@@ -30,9 +30,9 @@ import retrofit2.Response;
 public class ProfileEditActivity extends AppCompatActivity implements View.OnClickListener {
     private UserProfileManager userProfileManager;
     private EditText passwordEditText;
+    private EditText emailEditText;
     private EditText passwordRepeatEditText;
     private EditText usernameEditText;
-    private EditText emailEditText;
     private EditText countryEditText;
     private EditText bioEditText;
     private boolean changePassword;
@@ -93,8 +93,8 @@ public class ProfileEditActivity extends AppCompatActivity implements View.OnCli
                     break;
                 }
 
-                UserProfileEditRequest request = new UserProfileEditRequest(emailEditText.getText().toString(),
-                        usernameEditText.getText().toString(), countryEditText.getText().toString(),
+                UserProfileEditRequest request = new UserProfileEditRequest(usernameEditText.getText().toString(),
+                        countryEditText.getText().toString(),
                         bioEditText.getText().toString(),
                         null, null);
                 if (changePassword)
@@ -108,9 +108,11 @@ public class ProfileEditActivity extends AppCompatActivity implements View.OnCli
                         },
                         () -> {
                             Toast.makeText(this, "Data modification error.", Toast.LENGTH_SHORT).show();
+                            finish();
                         },
                         () -> {
                             Toast.makeText(this, "API error.", Toast.LENGTH_SHORT).show();
+                            finish();
                         });
                 break;
             }
@@ -127,11 +129,6 @@ public class ProfileEditActivity extends AppCompatActivity implements View.OnCli
 
         if (usernameEditText.getText().length() < 4 || usernameEditText.getText().length() > 32) {
             Toast.makeText(this, "Username must be between 4 and 32 characters.", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-
-        if (!isValidEmail(emailEditText.getText())) {
-            Toast.makeText(this, "Invalid email.", Toast.LENGTH_SHORT).show();
             return false;
         }
 
@@ -163,8 +160,5 @@ public class ProfileEditActivity extends AppCompatActivity implements View.OnCli
         }
 
         return true;
-    }
-    private static boolean isValidEmail(CharSequence target) {
-        return (!TextUtils.isEmpty(target) && Patterns.EMAIL_ADDRESS.matcher(target).matches());
     }
 }
