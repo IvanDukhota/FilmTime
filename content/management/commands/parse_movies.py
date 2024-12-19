@@ -4,7 +4,7 @@ import re
 import tmdbsimple as tmdb
 from yt_dlp import YoutubeDL
 from django.core.management.base import BaseCommand
-from DataBase.models import Genre, Content, Movie, Series, Director, ContentDirector, ContentGenres, Actor, ContentActor, Season, Episode
+from DataBase.models import *
 
 TMDB_API_KEY = 'a156846e2c691ef1efd0fe54cdcda912'
 
@@ -32,7 +32,6 @@ class Command(BaseCommand):
         elif content_type == 'series':
             self.parse_series(count, start_date, end_date)
         self.stdout.write("Парсинг завершено!")
-
 
     def parse_movies(self, count, start_date, end_date):
         discover = tmdb.Discover()
@@ -95,6 +94,7 @@ class Command(BaseCommand):
             'first_air_date.lte': end_date,
         }
         results = discover.tv(**params)['results'][:count]
+
 
         for tv in results:
             series_details = tmdb.TV(tv['id']).info()
@@ -180,28 +180,41 @@ class Command(BaseCommand):
             safe_title = re.sub(r'[<>:"/\\|?*]', '_', title).replace(' ', '_')
             if not safe_title.endswith('.jpg'):
                 safe_title += '.jpg'
-            path = os.path.join(f'{folder}', safe_title)
-            os.makedirs(os.path.dirname(path), exist_ok=True)
+
+
+            media_folder = 'media'
+            full_folder_path = os.path.join(media_folder, folder)
+            os.makedirs(full_folder_path, exist_ok=True)
+            full_file_path = os.path.join(full_folder_path, safe_title)
+            relative_path = os.path.join(folder, safe_title)
+
         except Exception as e:
-            self.stdout.write(f"Помилка створення каталогу для {title}. Шлях: {path}. Помилка: {str(e)}")
+            self.stdout.write(f"Помилка створення каталогу для {title}. Шлях: {full_file_path}. Помилка: {str(e)}")
             return None
 
         try:
-            with open(path, 'wb') as f:
+            with open(full_file_path, 'wb') as f:
                 for chunk in response.iter_content(1024):
                     f.write(chunk)
-            self.stdout.write(f"Зображення для {title} успішно збережено. Шлях: {path}")
-            return path
+            self.stdout.write(f"Зображення для {title} успішно збережено. Шлях: {full_file_path}")
+            return relative_path
         except Exception as e:
-            self.stdout.write(f"Помилка запису зображення для {title}. Шлях: {path}. Помилка: {str(e)}")
+            self.stdout.write(f"Помилка запису зображення для {title}. Шлях: {full_file_path}. Помилка: {str(e)}")
             return None
 
-
     def get_trailer_and_save(self, content_id, content_type, title):
-        file_path = os.path.join('trailers', f"{title.replace(' ', '_')}_trailer.mp4")
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
-
         try:
+            safe_title = re.sub(r'[<>:"/\\|?*]', '_', title).replace(' ', '_')
+            if not safe_title.endswith('_trailer.mp4'):
+                safe_title += '_trailer.mp4'
+
+            media_folder = 'media'
+            trailers_folder = os.path.join(media_folder, 'trailers')
+            os.makedirs(trailers_folder, exist_ok=True)
+
+            full_file_path = os.path.join(trailers_folder, safe_title)
+            relative_file_path = os.path.join('trailers', safe_title)
+
             if content_type == 'movie':
                 videos = tmdb.Movies(content_id).videos()
             elif content_type == 'tv':
@@ -212,36 +225,41 @@ class Command(BaseCommand):
             for video in videos['results']:
                 if video['type'] == 'Trailer' and video['site'] == 'YouTube':
                     youtube_url = f"https://www.youtube.com/watch?v={video['key']}"
-                    self._download_from_youtube(youtube_url, file_path)
-                    return file_path
+                    self._download_from_youtube(youtube_url, full_file_path)
+                    return relative_file_path
+
+            return self.download_trailer_from_youtube(title, full_file_path)
+
         except Exception as e:
-            self.stdout.write(f"Помилка отримання трейлера через TMDB: {str(e)}")
+            self.stdout.write(f"Помилка отримання трейлера: {str(e)}")
+            return None
+
+    def download_trailer_from_youtube(self, title, full_file_path):
+        ydl_opts = {
+            'format': 'best',
+            'outtmpl': full_file_path,
+            'quiet': True,
+        }
         try:
-            return self.download_trailer_from_youtube(title, file_path)
+            with YoutubeDL(ydl_opts) as ydl:
+                search_query = f"{title} trailer"
+                info = ydl.extract_info(f"ytsearch:{search_query}", download=True)
+                return os.path.relpath(ydl.prepare_filename(info['entries'][0]), 'media')
         except Exception as e:
-            self.stdout.write(f"Помилка отримання трейлера через YouTube: {str(e)}")
-        return None
+            self.stdout.write(f"Помилка завантаження трейлера з YouTube: {str(e)}")
+            return None
 
-
-    def download_trailer_from_youtube(self, title, file_path):
+    def _download_from_youtube(self, youtube_url, full_file_path):
         ydl_opts = {
             'format': 'best',
-            'outtmpl': file_path,
+            'outtmpl': full_file_path,
             'quiet': True,
         }
-        with YoutubeDL(ydl_opts) as ydl:
-            search_query = f"{title} trailer"
-            info = ydl.extract_info(f"ytsearch:{search_query}", download=True)
-            return ydl.prepare_filename(info['entries'][0]) # type: ignore
-
-    def _download_from_youtube(self, youtube_url, file_path):
-        ydl_opts = {
-            'format': 'best',
-            'outtmpl': file_path,
-            'quiet': True,
-        }
-        with YoutubeDL(ydl_opts) as ydl:
-            ydl.download([youtube_url])
+        try:
+            with YoutubeDL(ydl_opts) as ydl:
+                ydl.download([youtube_url])
+        except Exception as e:
+            self.stdout.write(f"Помилка завантаження з YouTube за URL: {str(e)}")
 
 
     def add_directors_and_cast(self, content_id, content, content_type):
@@ -253,14 +271,12 @@ class Command(BaseCommand):
             else:
                 return
 
-            # Add Directors
             for crew in credits['crew']:
                 if crew['job'] == 'Director':
                     director, _ = Director.objects.get_or_create(name=crew['name'])
                     ContentDirector.objects.get_or_create(content=content, director=director)
 
-            # Add Cast
-            for cast in credits['cast'][:10]:  # Limit to top 10 cast members
+            for cast in credits['cast'][:10]:
                 actor, _ = Actor.objects.get_or_create(name=cast['name'])
                 ContentActor.objects.get_or_create(
                     content=content,
@@ -269,7 +285,6 @@ class Command(BaseCommand):
                 )
         except Exception as e:
             self.stdout.write(f"Помилка при додаванні режисерів/акторів: {str(e)}")
-
 
     def add_genres(self, content_id, content, content_type):
         try:
@@ -281,11 +296,45 @@ class Command(BaseCommand):
                 return
 
             genres = details.get('genres', [])
+            added_genres = []
 
             for genre_data in genres:
                 genre, _ = Genre.objects.get_or_create(name=genre_data['name'])
 
                 ContentGenres.objects.get_or_create(content=content, genre=genre)
 
+                added_genres.append(genre)
+
+            self.notify_users_about_new_content(added_genres, content)
+
         except Exception as e:
             self.stdout.write(f"Помилка при додаванні жанрів: {str(e)}")
+
+    def notify_users_about_new_content(self, genres, content):
+        genre_ids = [genre.id for genre in genres]
+        matching_users = UserProfile.objects.filter(
+            usergenres__genre__id__in=genre_ids
+        ).distinct()
+
+        genre_names = ", ".join([genre.name for genre in genres])
+        notification_text = f"Новий контент у ваших улюблених жанрах: {genre_names}! Назва фільму: {content.title}."
+
+        notification = Notification.objects.create(
+            content_id=content,
+            text=notification_text
+        )
+
+        user_notifications = [
+            UserProfileNotifications(
+                userprofile=user_profile,
+                status="unread"
+            )
+            for user_profile in matching_users
+        ]
+
+        UserProfileNotifications.objects.bulk_create(user_notifications)
+
+        print(f"Створено {len(user_notifications)} сповіщень для користувачів.")
+
+
+

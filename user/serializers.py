@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from DataBase.models import UserProfileContentInfo
+from DataBase.models import *
 
 
 # serializers.py
@@ -55,3 +55,16 @@ class UserHistorySerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(obj.content.cover_image.url)
         return None
 
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = ['id', 'content_id', 'text', 'datetime']
+
+
+class UserProfileNotificationSerializer(serializers.ModelSerializer):
+    notification = NotificationSerializer(source='userprofile.notification', read_only=True)
+
+    class Meta:
+        model = UserProfileNotifications
+        fields = ['id', 'userprofile', 'status', 'notification']

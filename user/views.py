@@ -3,9 +3,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status, generics, permissions
-from django.utils import timezone  
-from DataBase.models import UserProfileContentInfo, Content  
-from .serializers import UserHistorySerializer
+from django.utils import timezone
+from DataBase.models import *
+from .serializers import *
+from .permissions import IsAdminUser
 
 
 class UserHistoryView(APIView):
@@ -18,6 +19,7 @@ class UserHistoryView(APIView):
         serializer = UserHistorySerializer(history, many=True, context={'request': request})
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class AddToHistoryView(APIView):
     permission_classes = [IsAuthenticated]
@@ -34,7 +36,6 @@ class AddToHistoryView(APIView):
         except Content.DoesNotExist:
             return Response({"error": "Content not found"}, status=status.HTTP_404_NOT_FOUND)
 
-    
         history_entry, created = UserProfileContentInfo.objects.update_or_create(
             userprofile=user_profile,
             content=content,
@@ -47,7 +48,6 @@ class AddToHistoryView(APIView):
             {"message": "Content added to history", "created": created},
             status=status.HTTP_201_CREATED,
         )
-
 
 
 class SubmitRatingView(generics.CreateAPIView):
@@ -80,7 +80,7 @@ class SubmitRatingView(generics.CreateAPIView):
 
         serializer = self.get_serializer(user_content_info)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
 
 class GetUserRatingView(generics.RetrieveAPIView):
     serializer_class = UserHistorySerializer
@@ -104,48 +104,130 @@ class GetUserRatingView(generics.RetrieveAPIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except UserProfileContentInfo.DoesNotExist:
             return Response({}, status=status.HTTP_404_NOT_FOUND)
-        
 
-class SubmitCommentView(APIView):
-    permission_classes = [IsAuthenticated]
 
-    def patch(self, request):
-        user_profile = request.user.userprofile
-        content_id = request.data.get("content_id")
-        comment = request.data.get("comment")
+class SubmitCommentView(generics.UpdateAPIView):
+    serializer_class = UserHistorySerializer
+    permission_classes = [permissions.IsAuthenticated]
 
-        if not content_id:
-            return Response({"error": "Content ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+    def patch(self, request, *args, **kwargs):
+        content_id = request.data.get('content_id')
+        comment_text = request.data.get('comment')
+
+        if content_id is None or comment_text is None:
+            return Response({'error': 'content_id и comment обязательны.'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             content = Content.objects.get(id=content_id)
         except Content.DoesNotExist:
-            return Response({"error": "Content not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Content не найден.'}, status=status.HTTP_404_NOT_FOUND)
 
-    
-        history_entry, created = UserProfileContentInfo.objects.get_or_create(
-            userprofile=user_profile,
-            content=content
+        userprofile = request.user.userprofile
+
+        user_content_info, created = UserProfileContentInfo.objects.get_or_create(
+            userprofile=userprofile,
+            content=content,
+            defaults={'comment': comment_text}
         )
 
-    
-        history_entry.comment = comment
-        history_entry.comment_date = timezone.now()
-        history_entry.save()
+        if not created:
+            user_content_info.comment = comment_text
+            user_content_info.save()
 
-        serializer = UserHistorySerializer(history_entry)
+        serializer = self.get_serializer(user_content_info)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class GetCommentsView(generics.ListAPIView):
     serializer_class = UserHistorySerializer
     permission_classes = [permissions.AllowAny]
-    
+
     def get_queryset(self):
         content_id = self.request.query_params.get('content_id')
         if content_id:
             return (UserProfileContentInfo.objects
                     .filter(content__id=content_id, comment__isnull=False)
-                    .select_related('content', 'userprofile')  
+                    .select_related('content', 'userprofile')
                     .order_by('-comment_date'))
         return UserProfileContentInfo.objects.none()
+
+
+class DeleteCommentView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, *args, **kwargs):
+        content_id = request.data.get('content_id')
+        comment_id = request.data.get('comment_id')
+
+        if content_id is None or comment_id is None:
+            return Response({'error': 'content_id и comment_id обязательны.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            content = Content.objects.get(id=content_id)
+        except Content.DoesNotExist:
+            return Response({'error': 'Content не найден.'}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            user_content_info = UserProfileContentInfo.objects.get(id=comment_id, content=content)
+        except UserProfileContentInfo.DoesNotExist:
+            return Response({'error': 'Комментарий не найден.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if not request.user.role in ['moderator', 'admin']:
+            return Response({'error': 'Недостаточно прав для удаления комментария.'}, status=status.HTTP_403_FORBIDDEN)
+
+        user_content_info.delete()
+
+        return Response({'message': 'Комментарий успешно удален.'}, status=status.HTTP_200_OK)
+
+
+class BanUserView(generics.UpdateAPIView):
+    permission_classes = [IsAdminUser]
+    queryset = User.objects.all()
+    serializer_class = None
+
+    def patch(self, request, *args, **kwargs):
+        user_id = request.data.get('user_id')
+        action = request.data.get('action')
+
+        if user_id is None:
+            return Response({'error': 'Необхідно вказати user_id для зміни статусу.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if action not in ['ban', 'unban']:
+            return Response({'error': 'Невірна дія. Дозволені значення: "ban" або "unban".'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({'error': 'Користувач не знайдений.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if action == 'ban':
+            if user.is_banned:
+                return Response({'error': 'Користувач вже заблокований.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            user.is_banned = True
+            user.save()
+            return Response({'message': f'Користувач {user.email} забанений успішно.'}, status=status.HTTP_200_OK)
+
+        if action == 'unban':
+            if not user.is_banned:
+                return Response({'error': 'Користувач не заблокований.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            user.is_banned = False
+            user.save()
+            return Response({'message': f'Користувач {user.email} розбанений успішно.'}, status=status.HTTP_200_OK)
+
+
+
+
+class AllNotificationsView(APIView):
+    def get(self, request):
+        notifications = Notification.objects.all()
+        serializer = NotificationSerializer(notifications, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class UserNotificationsView(APIView):
+    def get(self, request, user_id):
+        user_notifications = UserProfileNotifications.objects.filter(userprofile__user__id=user_id)
+        serializer = UserProfileNotificationSerializer(user_notifications, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
