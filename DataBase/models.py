@@ -38,6 +38,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
+    is_banned = models.BooleanField(default=False)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
@@ -186,9 +187,17 @@ class UserProfileContentInfo(models.Model):
 
 # Notification Model
 class Notification(models.Model):
-    userprofile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    content_id = models.ForeignKey(Content, on_delete=models.CASCADE)
     text = models.TextField()
     datetime = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Notification for {self.userprofile}"
+
+
+# UserProfileNotifications
+class UserProfileNotifications(models.Model):
+    userprofile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     status = models.CharField(
         max_length=10, choices=[("read", "Read"), ("unread", "Unread")]
     )
