@@ -1,176 +1,191 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>User Profile</title>
-        <link rel="stylesheet" href="../styles/user_profile.css">
-    </head>
-    <body>
-        <?php
-            include('header_logged_in.html');
-        ?>
 
-        <section class="profile_section">
-            <div class="profile_card">
-                <div class="user_icon"><img src="" alt="Profile Image" id="profileImage"></div>
-                <div class="profile_info">
-                    <div class="profile_name"></div>
-                    <div class="profile_country"></div>
-                    <div class="profile_description"></div>
-                </div>
-                <div class="profile_button">
-                    <button class="edit_button"><img class="img_edit_button" src="../styles/images/edit.png" alt="Edit">Edit</button>
-                    <button class="logout_button">Log Out</button>
-                </div>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="../styles/user_profile.css">
+</head>
+
+<body>
+    <?php
+    include('header_logged_in.html');
+    ?>
+
+    <section class="profile_section">
+        <div class="profile_card">
+            <div class="user_icon"><img src="" alt="Profile Image" id="profileImage"></div>
+            <div class="profile_info">
+                <div class="profile_name"></div>
+                <div class="profile_country"></div>
+                <div class="profile_description"></div>
             </div>
-        </section>
+            <div class="profile_button">
+                <button class="edit_button"><img class="img_edit_button" src="../styles/images/edit.png" alt="Edit">Edit</button>
+                <button class="logout_button">Log Out</button>
+            </div>
+        </div>
+    </section>
 
-        <div class="form_overlay hidden" id="editForm">
-            <div class="form_container">
-                <div class="form_content">
-                    <div class="left_section">
-                        <div class="profile_image">
-                            <img src="../styles/images/account.png" alt="Profile Image" id="profileIcon">
-                        </div>
+    <div class="form_overlay hidden" id="editForm">
+        <div class="form_container">
+            <div class="form_content">
+                <div class="left_section">
+                    <div class="profile_image">
+                        <img src="../styles/images/account.png" alt="Profile Image" id="profileIcon">
+                    </div>
+                    <div class="field_wrapper">
+                        <button class="upload_button" id="uploadButton">
+                            <img class="img_upload_button" src="../styles/images/download.png" alt="Upload Image">
+                            Upload new photo
+                            <input type="file" accept="image/png, image/jpeg, image/webp" style="display: none;">
+                        </button>
+                    </div>
+                </div>
+
+                <div class="right_section">
+                    <form>
                         <div class="field_wrapper">
-                            <button class="upload_button" id="uploadButton">
-                                <img class="img_upload_button" src="../styles/images/download.png" alt="Upload Image">
-                                Upload new photo
-                                <input type="file" accept="image/png, image/jpeg, image/webp" style="display: none;">
-                            </button>
+                            <input type="text" name="nickname" class="input_field" placeholder="" id="nickname" required>
+                            <label for="nickname" class="label_text">Nickname</label>
                         </div>
+
+                        <div class="field_wrapper">
+                            <input type="password" name="password" class="input_field" placeholder=" " id="password">
+                            <label for="password" class="label_text">Password</label>
+                        </div>
+
+                        <div class="field_wrapper">
+                            <input type="password" name="repeat_password" class="input_field" placeholder=" " id="repeat_password">
+                            <label for="repeat_password" class="label_text">Repeat password</label>
+                        </div>
+
+                        <div class="field_wrapper">
+                            <input type="text" name="country" class="input_field" placeholder="" id="country">
+                            <label for="country" class="label_text">Country</label>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="bottom_section">
+                    <div class="field_wrapper">
+                        <textarea name="about" class="input_field" placeholder="" id="about"></textarea>
+                        <label for="about" class="label_text">About Me</label>
                     </div>
 
-                    <div class="right_section">
-                        <form>
-                            <div class="field_wrapper">
-                                <input type="text" name="nickname" class="input_field" placeholder="" id="nickname" required>
-                                <label for="nickname" class="label_text">Nickname</label>
-                            </div>
-    
-                            <div class="field_wrapper">
-                                <input type="password" name="password" class="input_field" placeholder=" " id="password">
-                                <label for="password" class="label_text">Password</label>
-                            </div>
-                
-                            <div class="field_wrapper">
-                                <input type="password" name="repeat_password" class="input_field" placeholder=" " id="repeat_password">
-                                <label for="repeat_password" class="label_text">Repeat password</label>
-                            </div>
-
-                            <div class="field_wrapper">
-                                <input type="text" name="country" class="input_field" placeholder="" id="country">
-                                <label for="country" class="label_text">Country</label>
-                            </div>
-                        </form>
+                    <div class="preferences_list">
+                        <div class="genres_label">Preferences</div>
+                        <div id="genres" class="genres_container"></div>
                     </div>
 
-                    <div class="bottom_section">
-                        <div class="field_wrapper">
-                            <textarea name="about" class="input_field" placeholder="" id="about"></textarea>
-                            <label for="about" class="label_text">About Me</label>
-                        </div>
-
-                        <div class="preferences_list">
-                            <div class="genres_label">Preferences</div>
-                            <div id="genres" class="genres_container"></div>
-                        </div>
-
-                        <div class="form_buttons">
-                            <button type="button" id="cancelButton" class="cancel_button">Cancel</button>
-                            <button type="submit" class="edit_button">Edit</button>
-                        </div>
+                    <div class="form_buttons">
+                        <button type="button" id="cancelButton" class="cancel_button">Cancel</button>
+                        <button type="submit" class="edit_button">Edit</button>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <section class="content">
-            <div class="preferences">
-                <div class="topic-header">
-                    <div class="header-line-row"><div class="header-line"></div></div>
-                    <div class="link_hidden">Preferences</div>
+    <section class="content">
+        <div class="preferences">
+            <div class="topic-header">
+                <div class="header-line-row">
+                    <div class="header-line"></div>
                 </div>
-                <div class="empty_text"></div>
+                <div class="link_hidden">Preferences</div>
+            </div>
+            <div class="empty_text"></div>
+        </div>
+
+        <div class="recommendations">
+            <div class="topic-header">
+                <div class="header-line-row">
+                    <div class="header-line"></div>
+                </div>
+                <div class="link_hidden">Recommendations</div>
+            </div>
+            <div class="empty_text"></div>
+        </div>
+
+        <div class="saved">
+            <div class="topic-header">
+                <div class="header-line-row">
+                    <div class="header-line"></div>
+                </div>
+                <a href="javascript:void(0)" class="link_hidden" id="savedToggle">Saved
+                    <img class="saved_arrow_img" src="../styles/images/arrow_white.png" alt="Arrow">
+                </a>
+            </div>
+            <div class="form_overlay hidden" id="savedForm">
+                <div class="form_container">
+                    <div class="form_header">
+                        <button class="create_list_button" id="createListButton">
+                            <img class="create_list_img" src="../styles/images/add.png" alt="CreateList">
+                            Create a new list
+                        </button>
+                        <button id="closeSavedForm">
+                            <img class="saved_close_img" src="../styles/images/close.png" alt="Close">
+                        </button>
+                    </div>
+                    <div class="saved_list" id="savedList"></div>
+                </div>
             </div>
 
-            <div class="recommendations">
-                <div class="topic-header">
-                    <div class="header-line-row"><div class="header-line"></div></div>
-                    <div class="link_hidden">Recommendations</div>
+            <div class="form_overlay hidden" id="listForm">
+                <div class="form_container">
+                    <div class="form_header">
+                        <button id="deleteList">
+                            <img class="delete_list_img" src="../styles/images/delete.png" alt="Delete">
+                            Delete this list
+                        </button>
+                        <button id="closeListForm">
+                            <img class="saved_close_img" src="../styles/images/close.png" alt="Close">
+                        </button>
+                    </div>
+                    <div class="saved_media" id="savedMedia"></div>
+                    <div id="movieMenu" class="hidden">
+                        <button id="goToMoviePage">Go to Movie Page</button>
+                        <button id="removeFromList">Remove from List</button>
+                    </div>
+
                 </div>
-                <div class="empty_text"></div>
             </div>
 
-            <div class="saved">
-                <div class="topic-header">
-                    <div class="header-line-row"><div class="header-line"></div></div>
-                    <a href="javascript:void(0)" class="link_hidden" id="savedToggle">Saved
-                        <img class="saved_arrow_img" src="../styles/images/arrow_white.png" alt="Arrow">
-                    </a>
-                </div>
-                <div class="form_overlay hidden" id="savedForm">
-                    <div class="form_container">
-                        <div class="form_header">
-                            <button class="create_list_button" id="createListButton">
-                                <img class="create_list_img" src="../styles/images/add.png" alt="CreateList">
-                                Create a new list
-                            </button>
-                            <button id="closeSavedForm">
-                                <img class="saved_close_img" src="../styles/images/close.png" alt="Close">
-                            </button>
-                        </div>
-                        <div class="saved_list" id="savedList"></div>
+            <div class="form_overlay hidden" id="createListForm">
+                <div class="form_container">
+                    <div class="form_header">
+                        <h3>Create a New List</h3>
+                    </div>
+                    <div class="field_wrapper">
+                        <input type="text" name="listName" class="input_field" placeholder="" id="listName" required>
+                        <label for="listName" class="label_text">List name</label>
+                    </div>
+                    <div class="form_footer">
+                        <button id="cancelCreateList">Cancel</button>
+                        <button id="createListSubmit">Create</button>
                     </div>
                 </div>
-
-                <div class="form_overlay hidden" id="listForm">
-                    <div class="form_container">
-                        <div class="form_header">
-                            <button id="deleteList">
-                                <img class="delete_list_img" src="../styles/images/delete.png" alt="Delete">
-                                Delete this list
-                            </button>
-                            <button id="closeListForm">
-                                <img class="saved_close_img" src="../styles/images/close.png" alt="Close">
-                            </button>
-                        </div>
-                        <div class="saved_media" id="savedMedia"></div>
-                    </div>
-                </div>
-
-                <div class="form_overlay hidden" id="createListForm">
-                    <div class="form_container">
-                        <div class="form_header">
-                            <h3>Create a New List</h3>
-                        </div>
-                        <div class="field_wrapper">
-                            <input type="text" name="listName" class="input_field" placeholder="" id="listName" required>
-                            <label for="listName" class="label_text">List name</label>
-                        </div>
-                        <div class="form_footer">
-                            <button id="cancelCreateList">Cancel</button>
-                            <button id="createListSubmit">Create</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="empty_text"></div>
             </div>
+            <div class="empty_text"></div>
+        </div>
 
-            <div class="history">
-                <div class="topic-header">
-                    <div class="header-line-row"><div class="header-line"></div></div>
-                    <div class="link_hidden">History</div>
+        <div class="history">
+            <div class="topic-header">
+                <div class="header-line-row">
+                    <div class="header-line"></div>
                 </div>
-                <div class="empty_text"></div>
+                <div class="link_hidden">History</div>
             </div>
-        </section>
+            <div class="empty_text"></div>
+        </div>
+    </section>
 
-        <?php
-        include('footer.html');
-        ?>
-    </body>
-    <script>
+    <?php
+    include('footer.html');
+    ?>
+</body>
+<script>
     const backendUrl = "http://127.0.0.1:8000";
 
     const refreshAccessToken = async () => {
@@ -235,8 +250,9 @@
         return fetchData();
     };
 
-    document.addEventListener("DOMContentLoaded", async function() {
+    document.addEventListener("DOMContentLoaded", function() {
         const editButton = document.querySelector(".edit_button");
+        const logout = document.querySelector(".logout_button");
         const cancelButton = document.querySelector("#cancelButton");
         const editForm = document.querySelector("#editForm");
         const profileImage = document.querySelector("#profileImage");
@@ -251,28 +267,90 @@
         const savedToggle = document.getElementById("savedToggle");
         const savedForm = document.getElementById("savedForm");
         const closeSavedForm = document.getElementById("closeSavedForm");
+        const genresContainer = document.getElementById('genres');
         const listForm = document.getElementById("listForm");
         const createListForm = document.getElementById("createListForm");
         const closeListForm = document.getElementById("closeListForm");
         const createListButton = document.getElementById("createListButton");
         const cancelCreateList = document.getElementById("cancelCreateList");
         const createListSubmit = document.getElementById("createListSubmit");
-        const genresContainer = document.getElementById('genres');
+
+        const movieMenu = document.getElementById('movieMenu');
+        const goToMoviePageBtn = document.getElementById('goToMoviePage');
+        const removeFromListBtn = document.getElementById('removeFromList');
+
         let userPicture = "../styles/images/account.png";
         let currentNickname = "";
         let currentCountry = '';
         let currentBio = '';
         let userGenres = [];
 
-        async function loadUserGenres() {
+        let currentListId = null;
+        let currentContentId = null;
+
+
+        function showMovieMenu(x, y, listId, contentId) {
+            currentListId = listId;
+            currentContentId = contentId;
+            movieMenu.style.position = 'absolute';
+            movieMenu.style.left = x + 'px';
+            movieMenu.style.top = y + 'px';
+            movieMenu.classList.remove('hidden');
+        }
+
+        document.addEventListener('click', (event) => {
+            if (!movieMenu.contains(event.target) && !event.target.closest('.media_item')) {
+                movieMenu.classList.add('hidden');
+            }
+        });
+
+
+        goToMoviePageBtn.addEventListener('click', () => {
+            if (currentContentId) {
+                window.location.href = `content_viewer.php?content_id=${currentContentId}`;
+            }
+        });
+
+        removeFromListBtn.addEventListener('click', async () => {
+            if (currentListId && currentContentId) {
+                await removeContentFromList(currentListId, currentContentId);
+                movieMenu.classList.add('hidden');
+          
+                await loadSavedMovies(currentListId);
+            }
+        });
+
+        async function removeContentFromList(listId, contentId) {
+            let accessToken = localStorage.getItem('access_token');
             try {
-                const response = await fetchWithToken('http://localhost:8000/api/v1/registration/user/profile/', {
-                    method: 'GET',
+                const response = await fetch('http://localhost:8000/api/v1/content/content-list/content/', {
+                    method: "DELETE",
                     headers: {
-                        'Authorization': `Bearer ${accessToken}`,
+                        "Authorization": `Bearer ${accessToken}`,
+                        "Content-Type": "application/json"
                     },
+                    body: JSON.stringify({
+                        'list_id': listId,
+                        'content_id': contentId
+                    }),
                 });
 
+                if (response.ok) {
+                    console.log("Content removed successfully");
+                } else {
+                    const errorData = await response.json();
+                    console.error("Error removing content from list:", errorData);
+                }
+            } catch (error) {
+                console.error('Error removing content from list:', error);
+            }
+        }
+
+
+
+        async function loadUserGenres() {
+            try {
+                const response = await fetchWithToken('http://localhost:8000/api/v1/registration/user/profile/');
                 if (response.ok) {
                     const data = await response.json();
                     userGenres = data.genres.map(genre => genre.id);
@@ -289,7 +367,6 @@
 
         const loadRecommendations = async () => {
             try {
-                //Можливо потрібно замінити посилання
                 const response = await fetchWithToken('http://localhost:8000/api/v1/registration/user/profile/');
                 if (response.ok) {
                     const recommendations = await response.json();
@@ -306,20 +383,44 @@
 
         const loadSaved = async () => {
             try {
-                //Можливо потрібно замінити посилання
-                const response = await fetchWithToken('http://localhost:8000/api/v1/registration/user/profile/');
+                const response = await fetchWithToken('http://localhost:8000/api/v1/content/content-list/');
                 if (response.ok) {
-                    const saved = await response.json();
-                    savedContainer.innerHTML = saved.length > 0 ?
-                        renderMediaList(saved) :
-                        '<div class="empty_saved">You have not saved anything yet</div>';
+                    const lists = await response.json();
+
+                    if (lists.length > 0) {
+                        savedContainer.innerHTML = `
+                    <div id="savedList_saved_list">
+                        ${lists.map(list => `
+                            <div class="list_item" data-id="${list.id}">
+                                <img class="list_img" src="../styles/images/open-folder.png" alt="List">
+                                ${list.list_name}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                        const savedListItems = savedContainer.querySelectorAll('.list_item');
+                        savedListItems.forEach(item => {
+                            item.addEventListener('click', async (event) => {
+                                const listId = item.getAttribute('data-id');
+                                if (listId) {
+
+                                    listForm.classList.remove("hidden");
+                                    await loadSavedMovies(listId);
+                                }
+                            });
+                        });
+
+                    } else {
+                        savedContainer.innerHTML = '<div class="empty_saved">No created lists yet</div>';
+                    }
                 } else {
-                    console.error("Error fetching saved movies:", error);
+                    console.error("Error fetching saved lists:", response.statusText);
                 }
             } catch (error) {
-                console.error('Error fetching saved movies:', error);
+                console.error('Error fetching saved lists:', error);
             }
         };
+
 
         const loadHistory = async () => {
             try {
@@ -327,8 +428,8 @@
                 if (response.ok) {
                     const history = await response.json();
                     historyContainer.innerHTML = history.length > 0 ?
-                        renderMediaList(history) 
-                        : '<div class="empty_history">You have not watched anything yet</div>';
+                        renderMediaList(history) :
+                        '<div class="empty_history">You have not watched anything yet</div>';
                 } else {
                     console.error("Error fetching history:", response.statusText);
                 }
@@ -341,14 +442,15 @@
             return `
                 <div class="media_list">
                     ${mediaItems.map(item => `
-                        <a href="content_viewer.php" class="media_item">
-                            <img class="media" src="${item.content_picture}" alt="${item.title}">
-                            <div class="media_title">${item.title}</div>
+                        <a href="content_viewer.php?content_id=${item.content_id}" class="media_item">
+                            <img class="media" src="${item.cover_image}" alt="${item.content_title}">
+                            <div class="media_title">${item.content_title}</div>
                         </a>
                     `).join('')}
                 </div>
             `;
         };
+
 
         const addToHistory = async (contentId) => {
             const payload = {
@@ -374,13 +476,10 @@
             }
         };
 
+
         savedToggle.addEventListener("click", async () => {
             savedForm.classList.remove("hidden");
-            loadSavedLists();
-        });
-
-        closeSavedForm.addEventListener("click", () => {
-            savedForm.classList.add("hidden");
+            await loadSavedLists();
         });
 
         closeSavedForm.addEventListener("click", () => {
@@ -397,9 +496,9 @@
 
         document.getElementById("savedList").addEventListener("click", async (event) => {
             const target = event.target.closest(".list_item");
-            if(target) {
+            if (target) {
                 const listId = target.dataset.id;
-                if(listId) {
+                if (listId) {
                     savedForm.classList.add("hidden");
                     listForm.classList.remove("hidden");
                     await loadSavedMovies(listId);
@@ -407,30 +506,37 @@
             }
         });
 
-        document.getElementById("closeListForm").addEventListener("click", () => {
+        closeListForm.addEventListener("click", () => {
             listForm.classList.add("hidden");
             savedForm.classList.remove("hidden");
         });
 
         document.getElementById("deleteList").addEventListener("click", async () => {
-            const listId = document.querySelector(".list_item[data-id]").dataset.id;
-            if(listId) {
+            const listItem = document.querySelector(".list_item[data-id]");
+            if (listItem) {
+                const listId = listItem.dataset.id;
                 const confirmation = confirm("Are you sure you want to delete this list?");
-                if(confirmation) {
+                if (confirmation) {
+                    let accessToken = localStorage.getItem('access_token');
                     try {
-                        const response = await fetch(`http://localhost:8000/api/v1/content-list/${listId}/`, {
+                        const response = await fetch(`http://localhost:8000/api/v1/content/content-list/`, {
                             method: "DELETE",
                             headers: {
-                                Authorization: `Bearer ${accessToken}`,
+                                "Authorization": `Bearer ${accessToken}`,
+                                "Content-Type": "application/json"
                             },
+                            body: JSON.stringify({
+                                'list_id': listId
+                            })
                         });
                         if (response.ok) {
                             alert("List deleted successfully.");
                             listForm.classList.add("hidden");
                             savedForm.classList.remove("hidden");
-                            await loadSavedLists(); // Оновлення списку
+                            await loadSavedLists();
+                            await loadSaved();
                         } else {
-                            console.error("Error deleting list:", error);
+                            console.error("Error deleting list:", response.statusText);
                         }
                     } catch (error) {
                         console.error("Error deleting list:", error);
@@ -441,25 +547,30 @@
             }
         });
 
+
         createListSubmit.addEventListener("click", async () => {
             const listName = document.getElementById("listName").value.trim();
-            if(listName) {
+            if (listName) {
+                let accessToken = localStorage.getItem('access_token');
                 try {
-                    const response = await fetch("http://localhost:8000/api/v1/content-list/", {
+                    const response = await fetch("http://localhost:8000/api/v1/content/content-list/", {
                         method: "POST",
                         headers: {
                             Authorization: `Bearer ${accessToken}`,
                             "Content-Type": "application/json",
                         },
-                        body: JSON.stringify({ name: listName }),
+                        body: JSON.stringify({
+                            'list_name': listName
+                        }),
                     });
 
-                    if(response.ok) {
+                    if (response.ok) {
                         alert("List created successfully!");
                         createListForm.classList.add("hidden");
-                        loadSavedLists();
+                        await loadSavedLists();
+                        await loadSaved();
                     } else {
-                        console.error('Error creating list:', error);
+                        console.error('Error creating list:', response.statusText);
                     }
                 } catch (error) {
                     console.error('Error creating list:', error);
@@ -469,33 +580,56 @@
             }
         });
 
+
         async function loadSavedLists() {
             const savedListContainer = document.getElementById("savedList");
+            let accessToken = localStorage.getItem('access_token');
             try {
-                const response = await fetch("http://localhost:8000/api/v1/content-list/");
+                const response = await fetch("http://localhost:8000/api/v1/content/content-list/", {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                        "Content-Type": "application/json",
+                    }
+                });
 
-                if(response.ok) {
+                if (response.ok) {
                     const lists = await response.json();
+                    console.log(lists.data);
                     savedListContainer.innerHTML = lists.length > 0 ?
-                    lists.map((list) => `
-                        <div class="list_item" data-id="${list.id}">
-                            <img class="list_img" src="../styles/images/open-folder.png" alt="List">
-                            ${list.name}
-                        </div>`
-                    ).join(""):
-                    '<div class="empty_saved_form">No created lists yet.</div>';
+                        lists.map((list) => `
+                <div class="list_item" data-id="${list.id}">
+                    <img class="list_img" src="../styles/images/open-folder.png" alt="List">
+                    ${list.list_name}
+                </div>`).join("") :
+                        '<div class="empty_saved_form">No created lists yet.</div>';
+
+
+                    const listItems = savedListContainer.querySelectorAll('.list_item');
+                    listItems.forEach(item => {
+                        item.addEventListener('click', async () => {
+                            const listId = item.dataset.id;
+                            if (listId) {
+
+                                listForm.classList.remove("hidden");
+                                await loadSavedMovies(listId);
+                            }
+                        });
+                    });
                 } else {
-                    console.error('Error loading lists:', error);
+                    console.error('Error loading lists:', response.statusText);
                 }
             } catch (error) {
                 console.error('Error loading lists:', error);
             }
         }
 
+
         async function loadSavedMovies(listId) {
+            let accessToken = localStorage.getItem('access_token');
             const savedMediaContainer = document.getElementById("savedMedia");
             try {
-                const response = await fetchWithToken(`http://localhost:8000/api/v1/registration/user/content-list/${listId}/`, {
+                const response = await fetch(`http://localhost:8000/api/v1/content/content-list/?list_id=${listId}`, {
                     method: "GET",
                     headers: {
                         Authorization: `Bearer ${accessToken}`,
@@ -503,21 +637,37 @@
                 });
                 if (response.ok) {
                     const savedMovies = await response.json();
-                    savedMedia.innerHTML = savedMovies.length > 0 ?
-                        savedMovies.map(movie => `
-                            <a href="content_viewer.php?id=${listId}" class="media_item">
-                                <img class="media" src="${movie.content_picture}" alt="${movie.title}">
-                                <div class="media_title">${movie.title}</div>
-                            </a>
-                        `).join('') :
+                    savedMediaContainer.innerHTML = savedMovies.contents.length > 0 ?
+                        savedMovies.contents.map(movie => `
+                    <div class="media_item" data-content-id="${movie.content_id}">
+                        <img class="media" src="${movie.cover_image}" alt="${movie.content_title}">
+                        <div class="media_title">${movie.content_title}</div>
+                    </div>
+                `).join('') :
                         '<div class="empty_saved_form">No saved movies yet.</div>';
+
+                    const mediaItems = savedMediaContainer.querySelectorAll('.media_item');
+                    mediaItems.forEach(item => {
+                        item.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+
+                            const contentId = item.dataset.contentId;
+                   
+                            showMovieMenu(e.clientX, e.clientY, listId, contentId);
+                        });
+                    });
+
                 } else {
-                    console.error("Error fetching saved movies:", error);
+                    console.error("Error fetching saved movies:", response.statusText);
                 }
+
             } catch (error) {
                 console.error('Error fetching saved movies:', error);
             }
         }
+
+
 
         async function loadAllGenres() {
             try {
@@ -526,7 +676,7 @@
                     const data = await response.json();
                     return data;
                 } else {
-                    console.error("Error loading genres::", error);
+                    console.error("Error loading genres::", response.statusText);
                 }
             } catch (error) {
                 console.error('Error loading genres::', error);
@@ -553,6 +703,28 @@
 
                 genresContainer.appendChild(tag);
             });
+        }
+
+        async function loadUserFormGenres() {
+            let accessToken = localStorage.getItem('access_token');
+
+            try {
+                const response = await fetchWithToken('http://localhost:8000/api/v1/registration/user/profile/', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                    },
+                });
+
+                if (response && response.ok) {
+                    const data = await response.json();
+                    userGenres = (data.genres || []).map(genre => genre.id);
+                } else {
+                    console.error('Error fetching user genres');
+                }
+            } catch (error) {
+                console.error('Error fetching user genres:', error);
+            }
         }
 
         function getSelectedGenres() {
@@ -613,7 +785,7 @@
                         profileImage.src = "../styles/images/account.png";
                     }
                 } else {
-                    console.error('Error fetching user profile:', data);
+                    console.error('Error fetching user profile');
                 }
             } catch (error) {
                 console.error('Error fetching user profile:', error);
@@ -660,6 +832,13 @@
             } catch (error) {
                 console.error("Error loading profile:", error);
             }
+        });
+
+        logout.addEventListener("click", async () => {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+
+            window.location.href = '/views/login.php';
         });
 
         const uploadButton = document.querySelector(".upload_button");
@@ -709,7 +888,7 @@
                     editForm.classList.add("hidden");
                     await fetchUserProfile();
                 } else {
-                    console.error('Error updating profile:', data);
+                    console.error('Error updating profile');
                 }
             } catch (error) {
                 console.error("Error updating profile:", error);
@@ -796,6 +975,8 @@
 
             await saveGenres();
             await editUserProfile(formData);
+
+            await loadUserGenres();
         });
 
         fetchUserProfile();
@@ -810,4 +991,5 @@
         await populateGenres();
     });
 </script>
+
 </html>

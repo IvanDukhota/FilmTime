@@ -126,7 +126,6 @@
                     if (response.ok) {
                         
                         console.log(data.access);
-                        alert("1");
                         localStorage.setItem('access_token', data.access);  
                         localStorage.setItem('refresh_token', data.refresh);
 
