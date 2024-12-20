@@ -14,18 +14,18 @@ import retrofit2.http.POST;
 import retrofit2.http.PATCH;
 
 public interface ApiService {
-    @POST("/api/v1/login/")
+    @POST("/api/v1/registration/login/")
     Call<LoginResponse> login(@Body LoginRequest loginRequest);
 
-    @POST("/api/v1/register/")
+    @POST("/api/v1/registration/register/")
     Call<LoginResponse> signUp(@Body RegisterRequest registerRequest);
 
-    @GET("/api/v1/user/profile/")
+    @GET("/api/v1/registration/user/profile/")
     Call<UserProfileResponse> getUserProfile();
 
-    @PATCH("/api/v1/user/profile/edit/")
+    @PATCH("/api/v1/registration/user/profile/edit/")
     Call<UserProfileEditResponse> editUserProfile(@Body UserProfileEditRequest userProfileEditRequest);
 
-    @POST("/api/v1/token/refresh/")
+    @POST("/api/v1/registration/token/refresh/")
     Call<LoginResponse> refreshToken(@Body String refresh);
 }
