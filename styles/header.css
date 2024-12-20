@@ -112,10 +112,10 @@
     display: none;
 }
 
-.search_img {
+.subscription_img {
     width: 30px;
     height: 30px;
-    background-image: url(../styles/images/search_image.png);
+    background-image: url(../styles/images/subscription.png);
     background-size: cover;
 }
 
