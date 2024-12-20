@@ -16,8 +16,17 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from content.views import Movies
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/v1/', include('registration.urls')), 
+    path('api/v1/registration/', include('registration.urls')),
+    path('api/v1/content/', include('content.urls')),
+    path('movie/', Movies.movie_link, name='movie_link'),
+    path('api/v1/user/', include('user.urls')), 
 ]
+
+if settings.DEBUG:  
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

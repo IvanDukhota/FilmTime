@@ -12,3 +12,7 @@ __pycache__
 
 #django stuff
 db.sqlite3
+
+media
+
+populate_db.py

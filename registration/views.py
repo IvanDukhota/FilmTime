@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import generics, status
-from .models import User, UserProfile
-from .serializers import UserSerializer, CustomTokenObtainPairSerializer,  UserProfileSerializer
+from DataBase.models import User, UserProfile, Genre, UserGenres
+from .serializers import UserSerializer, CustomTokenObtainPairSerializer,  UserProfileSerializer, GenreSerializer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth.hashers import check_password
@@ -16,6 +16,11 @@ from urllib.parse import urlencode
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view
+from DataBase.models import Content
+from django.core.files.base import ContentFile
+import base64
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 class UserListView(generics.ListAPIView):
@@ -279,18 +284,30 @@ class UserProfileView(APIView):
         user = request.user
         user_profile = user.userprofile
 
-        data = { 
+       
+        user_genres = UserGenres.objects.filter(userprofile=user_profile).select_related('genre')
+
+        data = {
             "user_id": user.id,
             "email": user.email,
             "username": user_profile.username,
             "role": user.role,
-            "profile_picture": user_profile.profile_picture,
+            "profile_picture": (
+                user_profile.profile_picture.url
+                if user_profile.profile_picture
+                else None
+            ),
             "country": user_profile.country,
             "bio": user_profile.bio,
             "status": user_profile.status,
+            "genres": [
+                {"id": ug.genre.id, "name": ug.genre.name} for ug in user_genres # type: ignore
+            ], 
         }
 
         return Response(data)
+
+
 
 
 
@@ -301,12 +318,108 @@ class EditUserProfileView(APIView):
         user = request.user
         user_profile = user.userprofile
 
+        password = request.data.get("password")
+        if password:
+            user.set_password(password)
+            user.save()
+
+        profile_picture = request.FILES.get("profile_picture")
+        if profile_picture:
+            user_profile.profile_picture = profile_picture
+
         serializer = UserProfileSerializer(
             user_profile, data=request.data, partial=True
         )
 
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "Profile updated successfully!", "data": serializer.data}, status=status.HTTP_200_OK)
+            return Response(
+                {"message": "Profile updated successfully!"}, status=status.HTTP_200_OK
+            )
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class GenreListView(APIView):
+    def get(self, request):
+        genres = Genre.objects.all()
+        serializer = GenreSerializer(genres, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class AddUserGenresView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        user_profile = user.userprofile
+        genre_ids = request.data.get("genre_ids", [])
+
+        if not isinstance(genre_ids, list):
+            return Response(
+                {"error": "genre_ids must be a list."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        added_genres = []
+        for genre_id in genre_ids:
+            try:
+                genre = Genre.objects.get(id=genre_id)
+                user_genre, created = UserGenres.objects.get_or_create(
+                    userprofile=user_profile, genre=genre
+                )
+                if created:
+                    added_genres.append(genre.name)
+            except Genre.DoesNotExist:
+                return Response(
+                    {"error": f"Genre id {genre_id} doesnt exist."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        return Response(
+            {
+                "message": "Add Succesful.",
+                "added_genres": added_genres,
+            },
+            status=status.HTTP_200_OK
+        )
+
+
+class UpdateUserGenresView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, *args, **kwargs):
+        user = request.user
+        user_profile = user.userprofile
+        new_genre_ids = request.data.get("genre_ids", [])
+
+        if not isinstance(new_genre_ids, list):
+            return Response(
+                {"error": "genre_ids must be a list."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+      
+        current_genres = UserGenres.objects.filter(userprofile=user_profile).values_list('genre_id', flat=True)
+
+     
+        genres_to_add = set(new_genre_ids) - set(current_genres)
+
+     
+        genres_to_remove = set(current_genres) - set(new_genre_ids)
+
+      
+        UserGenres.objects.filter(userprofile=user_profile, genre_id__in=genres_to_remove).delete()
+
+       
+        for genre_id in genres_to_add:
+            genre = Genre.objects.get(id=genre_id)
+            UserGenres.objects.create(userprofile=user_profile, genre=genre)
+
+        return Response(
+            {"message": "Updated successfully."},
+            status=status.HTTP_200_OK,
+        )
+
