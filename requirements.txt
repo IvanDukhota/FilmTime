@@ -1,7 +1,8 @@
-Django==4.2.3
+Django
 djangorestframework
 djangorestframework_simplejwt
 django-cors-headers
 django-requests
 python-dotenv
 psycopg2
+pillow
