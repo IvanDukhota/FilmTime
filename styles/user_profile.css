@@ -82,7 +82,11 @@ body {
     margin-bottom: 17px;
 }
 
-.edit_button {
+.hidden {
+    display: none;
+}
+
+.edit_button, .block_button {
     color: #232323;
     font-family: 'Roboto', sans-serif;
     font-size: 24px;
@@ -96,7 +100,7 @@ body {
     margin-bottom: 24px;
 }
 
-.edit_button:hover, .edit_button:active {
+.edit_button:hover, .edit_button:active, .block_button:hover, .block_button:active {
     background-color: #8F959D;
     color: #464646;
     border-color: #8F959D;
@@ -108,7 +112,13 @@ body {
     margin-right: 12px;
 }
 
-.logout_button {
+.img_block_button, .img_unblock_button {
+    width: 22px;
+    height: 22px;
+    margin-right: 12px;
+}
+
+.logout_button, .unblock_button {
     color: #f5f5f5;
     font-family: 'Roboto', sans-serif;
     font-size: 24px;
@@ -121,7 +131,7 @@ body {
     width: 213px;
 }
 
-.logout_button:hover, .logout_button:active {
+.logout_button:hover, .logout_button:active, .unblock_button:hover, .unblock_button:active {
     background-color: #2A3745;
     color: #f5f5f5;
     border-color: #2A3745;

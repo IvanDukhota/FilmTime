@@ -276,11 +276,7 @@
 
 
             <h3>View comments:</h3>
-            <div class="comment">
-                <div id="comments-container">
-
-                </div>
-            </div>
+            <div id="comment"></div>
         </div>
     </div>
 
@@ -535,33 +531,76 @@
                     });
                     if (response.ok) {
                         const data = await response.json();
-                        const commentsContainer = document.getElementById('comments-container');
+                        const commentsContainer = document.getElementById('comment');
                         commentsContainer.innerHTML = '';
 
                         if (data.length === 0) {
-                            commentsContainer.innerHTML = '<p>No comments yet. Be the first to comment!</p>';
+                            commentsContainer.innerHTML = '<h2>No comments yet. Be the first to comment!</h2>';
                             return;
                         }
 
+                        const userRole = localStorage.getItem('user_role');
+
                         data.forEach(comment => {
                             const commentBlock = document.createElement('div');
-                            commentBlock.classList.add('comment-content');
+                            commentBlock.classList.add('comments-container');
 
                             commentBlock.innerHTML = `
                                 <div class="comment-content">
-                                    <strong>${escapeHTML(comment.user_name)}</strong>
-                                    <p>${escapeHTML(comment.comment)}</p>
+                                    <div class="comment-header">
+                                        <img class="img_account" src="${comment.user_avatar || '../styles/images/account.png'}" alt="Account Image"
+                                            ${['admin', 'moderator'].includes(userRole) ? `onclick="goToUserProfile(${comment.user_id})"` : ''}
+                                            style="cursor: ${['admin', 'moderator'].includes(userRole) ? 'pointer' : 'default'};"
+                                        >
+                                        <strong>${escapeHTML(comment.user_name)}</strong>
+                                    </div>
                                     <span class="comment-date">${new Date(comment.comment_date).toLocaleString()}</span>
+                                    <p>${escapeHTML(comment.comment)}</p>
                                 </div>
+                                <button class="delete-comment-button hidden" onclick="deleteComment(${comment.comment_id})">
+                                    <img class="img_delete" src="../styles/images/delete.png" alt="Delete Image">
+                                </button>
                             `;
 
                             commentsContainer.appendChild(commentBlock);
+
+                            if (['admin', 'moderator'].includes(userRole)) {
+                                const deleteButton = commentBlock.querySelector('.delete-comment-btn');
+                                deleteButton.classList.remove('hidden');
+                            }
                         });
                     } else {
                         console.error('Не удалось получить комментарии:', response.statusText);
                     }
                 } catch (error) {
                     console.error('Ошибка при получении комментариев:', error);
+                }
+            };
+
+            const goToUserProfile = (userId) => {
+                window.location.href = `user_profile.php?user_id=${userId}`;
+            };
+
+            const deleteComment = async (commentId) => {
+                try {
+                    const accessToken = localStorage.getItem('access_token');
+                    const response = await fetch(`http://localhost:8000/api/v1/user/delete-comment/`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${accessToken}`,
+                        },
+                        body: JSON.stringify({ comment_id: commentId, content_id: contentId }),
+                    });
+
+                    if (response.ok) {
+                        alert('Коментар видалено');
+                        fetchComments();
+                    } else {
+                        console.error('Помилка при видаленні коментаря:', response.statusText);
+                    }
+                } catch (error) {
+                    console.error('Помилка при видаленні коментаря:', error);
                 }
             };
 

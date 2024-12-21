@@ -23,6 +23,8 @@
             <div class="profile_button">
                 <button class="edit_button"><img class="img_edit_button" src="../styles/images/edit.png" alt="Edit">Edit</button>
                 <button class="logout_button">Log Out</button>
+                <button class="block_button hidden"><img class="img_block_button" src="../styles/images/lock.png" alt="Block">Block User</button>
+                <button class="unblock_button hidden"><img class="img_unblock_button" src="../styles/images/unlock.png" alt="Unblock">Unblock User</button>
             </div>
         </div>
     </section>
@@ -253,6 +255,8 @@
     document.addEventListener("DOMContentLoaded", function() {
         const editButton = document.querySelector(".edit_button");
         const logout = document.querySelector(".logout_button");
+        const blockButton = document.querySelector(".block_button");
+        const unblockButton = document.querySelector(".unblock_button");
         const cancelButton = document.querySelector("#cancelButton");
         const editForm = document.querySelector("#editForm");
         const profileImage = document.querySelector("#profileImage");
@@ -288,6 +292,27 @@
         let currentListId = null;
         let currentContentId = null;
 
+        async function handleRole() {
+            try {
+                const response = await fetchWithToken('http://localhost:8000/api/v1/registration/user/profile/');
+                if (response.ok) {
+                    const userProfile = await response.json();
+                    const userRole = userProfile.role;
+
+                    if (['admin', 'moderator'].includes(userRole)) {
+                        blockButton.classList.remove('hidden');
+                        unblockButton.classList.remove('hidden');
+
+                        editButton.classList.add('hidden');
+                        logoutButton.classList.add('hidden');
+                    }
+                } else {
+                    console.error('Error fetching user profile:', response.status);
+                }
+            } catch (error) {
+                console.error('Error fetching user profile:', error);
+            }
+        }
 
         function showMovieMenu(x, y, listId, contentId) {
             currentListId = listId;
@@ -345,8 +370,6 @@
                 console.error('Error removing content from list:', error);
             }
         }
-
-
 
         async function loadUserGenres() {
             try {
@@ -987,6 +1010,7 @@
     });
 
     document.addEventListener("DOMContentLoaded", async function() {
+        await handleRole();
         await loadUserGenres();
         await populateGenres();
     });

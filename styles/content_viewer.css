@@ -444,10 +444,27 @@ body {
     height: 24px;
 }
 
-.comment {
+#comment {
+    display: flex;
+    flex-direction: column;
+}
+
+#comment h2 {
+    display: flex;
+    justify-content: center;
     color: #f5f5f5;
     font-family: 'Roboto', sans-serif;
-    font-size: 18px;
+    font-size: 20px;
+    font-weight: 400;
+    margin: 24px 24px 0 24px;
+}
+
+.comments-container {
+    display: flex;
+    justify-content: space-between;
+    color: #f5f5f5;
+    font-family: 'Roboto', sans-serif;
+    font-size: 20px;
     font-weight: 400;
     background-color: #1E2A38;
     border: solid 3px #f5f5f5;
@@ -456,27 +473,67 @@ body {
     padding: 10px 16px;
     height: auto;
     width: auto;
-    display: flex;
     margin: 24px 24px 0 24px;
     gap: 20px;
 }
 
-.img_account {
-    width: 40px;
-    height: 40px;
-}
-
-.comment-content strong {
-    margin-bottom: 5px;
-}
-
 .comment-content {
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    white-space: normal;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
 }
 
-/* _________________________________________________________ */
+.comment-content p {
+    overflow-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
+    max-width: 100%;
+    line-height: 1.5;
+}
+
+.comment-header {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+}
+
+.img_account {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.comment-header strong {
+    margin-bottom: 5px;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.comment-date {
+    font-size: 0.8rem;
+}
+
+.delete-comment-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.img_delete {
+    width: 47px;
+    height: 47px;
+    padding: 11px;
+}
+
+.img_delete:hover {
+    width: 47px;
+    height: 47px;
+    background-color: #2A3745;
+    padding: 0;
+    border: solid 11px #2A3745;
+    border-radius: 50%;
+}
 
 h3{
     font-family: 'Roboto', sans-serif;
