@@ -1,29 +1,70 @@
 <header class="page_header">
-    <link href="../styles/header.css" type="text/css" rel="stylesheet"/>
-  
-    <nav class="navbar">
-      <div class="logo">
-        <a class="logo_img noselect" href="homepage.php"></a>
-        <a class="link_hidden_header noselect" href="homepage.php">FilmTime</a>
-      </div>
-  
-      <ul class="links">
-        <li><a class="link1 link_hidden_header noselect" href="homepage.php">Home</a></li>
-        <li><a class="link2 link_hidden_header noselect" href="content_searching.php">Movies</a></li>
-        <li><a class="link3 link_hidden_header noselect" href="content_searching.php">TV shows</a></li>
-        <li><a class="link4 link_hidden_header noselect" href="content_searching.php">Cartoons</a></li>  
-      </ul>
-  
-      <div class="profile">
-        <a class="search_img noselect" href="search_image"></a>
-        <div class="notification_icon" onclick="toggleNotifications()">
-            <img src="../styles/images/notification.png" alt="Notifications">
-        </div>
-        <div class="notifications" id="notifications">
-            <p>There are no new notifications.</p>
-        </div>
-        <a class="user_profile_img noselect" href="user_profile.php"></a>
-      </div>
-    </nav>
+  <link href="../styles/header.css" type="text/css" rel="stylesheet"/>
 
-  </header>
+  <nav class="navbar">
+    <div class="logo">
+      <a class="logo_img noselect" href="homepage.php"></a>
+      <a class="link_hidden_header noselect" href="homepage.php">FilmTime</a>
+    </div>
+
+    <ul class="links">
+      <li><a class="link1 link_hidden_header noselect" href="homepage.php">Home</a></li>
+      <li><a class="link2 link_hidden_header noselect" href="content_searching.php">Movies</a></li>
+      <li><a class="link3 link_hidden_header noselect" href="content_searching.php">TV shows</a></li>
+      <li><a class="link4 link_hidden_header noselect" href="content_searching.php">Cartoons</a></li>  
+    </ul>
+
+    <div class="profile">
+      <a class="subscription_img noselect" href="subscription_page.php" onclick="toggleSubscription()"></a>
+      <div class="notification_icon" onclick="toggleNotifications()">
+        <img src="../styles/images/notification.png" alt="Notifications">
+      </div>
+      <div class="notifications" id="subscriptionNotifications">
+          <button class="delete-all" onclick="clearNotifications()">
+            Delete all
+            <img class="delete-all-icon" src="../styles/images/delete.png" alt="Delete">
+          </button>
+          <div class="notification-item">
+            <a class="notification-content" href="">
+              <img class="notification-icon" src="../styles/images/notification.png" alt="Notifications">
+              <h3 class="notification-message">There's a new movie out that you might like. The Hunger Games: Sunrise on the Reaping.</h3>
+            </a>
+            <button class="delete-notification" onclick="deleteNotification(this)">
+              <img class="delete-icon" src="../styles/images/delete.png" alt="Delete">
+            </button>
+          </div>
+          <div class="notification-item">
+            <a class="notification-content" href="">
+              <img class="notification-icon" src="../styles/images/notification.png" alt="Notifications">
+              <h3 class="notification-message">There's a new movie out that you might like. The Hunger Games: Sunrise on the Reaping.</h3>
+            </a>
+            <button class="delete-notification" onclick="deleteNotification(this)">
+              <img class="delete-icon" src="../styles/images/delete.png" alt="Delete">
+            </button>
+          </div>
+      </div>
+      <div class="notifications" id="notifications">
+          <p>There are no new notifications.</p>
+      </div>
+      <a class="user_profile_img noselect" href="user_profile.php"></a>
+    </div>
+  </nav>
+
+  <script>
+    function toggleNotifications() {
+      const notifications = document.getElementById('subscriptionNotifications');
+      notifications.style.display = notifications.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function clearNotifications() {
+      const notifications = document.getElementById('subscriptionNotifications');
+      notifications.innerHTML = '<p>No new notifications.</p>';
+    }
+
+    function deleteNotification(button) {
+      const notification = button.parentElement;
+      notification.remove();
+    }
+  </script>
+
+</header>
