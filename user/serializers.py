@@ -59,12 +59,16 @@ class UserHistorySerializer(serializers.ModelSerializer):
 class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
-        fields = ['id', 'content_id', 'text', 'datetime']
-
+        fields = ['id', 'content', 'text', 'datetime']
 
 class UserProfileNotificationSerializer(serializers.ModelSerializer):
-    notification = NotificationSerializer(source='userprofile.notification', read_only=True)
+    notification = NotificationSerializer()
 
     class Meta:
         model = UserProfileNotifications
         fields = ['id', 'userprofile', 'status', 'notification']
+
+class UserProfileNotificationUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfileNotifications
+        fields = ['status']

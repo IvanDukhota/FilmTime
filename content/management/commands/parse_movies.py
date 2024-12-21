@@ -320,13 +320,14 @@ class Command(BaseCommand):
         notification_text = f"Новий контент у ваших улюблених жанрах: {genre_names}! Назва фільму: {content.title}."
 
         notification = Notification.objects.create(
-            content_id=content,
+            content=content,
             text=notification_text
         )
 
         user_notifications = [
             UserProfileNotifications(
                 userprofile=user_profile,
+                notification=notification,
                 status="unread"
             )
             for user_profile in matching_users
@@ -335,6 +336,7 @@ class Command(BaseCommand):
         UserProfileNotifications.objects.bulk_create(user_notifications)
 
         print(f"Створено {len(user_notifications)} сповіщень для користувачів.")
+
 
 
 

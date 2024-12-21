@@ -187,23 +187,26 @@ class UserProfileContentInfo(models.Model):
 
 # Notification Model
 class Notification(models.Model):
-    content_id = models.ForeignKey(Content, on_delete=models.CASCADE)
+    content = models.ForeignKey(Content, on_delete=models.CASCADE)
     text = models.TextField()
     datetime = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Notification for {self.userprofile}"
+        return f"Notification for {self.content.title} at {self.datetime}"
+
 
 
 # UserProfileNotifications
 class UserProfileNotifications(models.Model):
-    userprofile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    userprofile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='notifications')
+    notification = models.ForeignKey(Notification, on_delete=models.CASCADE, related_name='user_notifications')
     status = models.CharField(
         max_length=10, choices=[("read", "Read"), ("unread", "Unread")]
     )
 
     def __str__(self):
-        return f"Notification for {self.userprofile}"
+        return f"Notification for {self.userprofile} - {self.notification}"
+
 
 
 # Movies Model

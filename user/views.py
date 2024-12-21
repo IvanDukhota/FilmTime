@@ -219,15 +219,44 @@ class BanUserView(generics.UpdateAPIView):
 
 
 
-class AllNotificationsView(APIView):
-    def get(self, request):
-        notifications = Notification.objects.all()
-        serializer = NotificationSerializer(notifications, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    
 
 
-class UserNotificationsView(APIView):
-    def get(self, request, user_id):
-        user_notifications = UserProfileNotifications.objects.filter(userprofile__user__id=user_id)
-        serializer = UserProfileNotificationSerializer(user_notifications, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+class UserNotificationsView(generics.ListAPIView):
+    serializer_class = UserProfileNotificationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user_id = self.kwargs['user_id']
+        return UserProfileNotifications.objects.filter(userprofile__user__id=user_id).order_by('-notification__datetime')
+
+class NotificationDeleteView(generics.DestroyAPIView):
+    queryset = UserProfileNotifications.objects.all()
+    serializer_class = UserProfileNotificationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    lookup_field = 'id'
+
+    def delete(self, request, *args, **kwargs):
+        notification = self.get_object()
+        if notification.userprofile.user != request.user:
+            return Response({"detail": "Не дозволено."}, status=status.HTTP_403_FORBIDDEN)
+        return self.destroy(request, *args, **kwargs)
+
+class UserClearNotificationsView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, user_id):
+        if request.user.id != int(user_id):
+            return Response({"detail": "Не дозволено."}, status=status.HTTP_403_FORBIDDEN)
+        deleted, _ = UserProfileNotifications.objects.filter(userprofile__user__id=user_id).delete()
+        return Response({"deleted": deleted}, status=status.HTTP_204_NO_CONTENT)
+    
+
+class UserProfileNotificationUpdateView(generics.UpdateAPIView):
+    queryset = UserProfileNotifications.objects.all()
+    serializer_class = UserProfileNotificationUpdateSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return UserProfileNotifications.objects.filter(userprofile=self.request.user.userprofile)
