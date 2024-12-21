@@ -2,29 +2,47 @@ package com.filmtime;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.helper.widget.Flow;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.filmtime.api.GenresFetchContract;
+import com.filmtime.api.PreferencesSaveContract;
 import com.filmtime.api.UserProfile.UserProfileEditContract;
 import com.filmtime.api.UserProfile.UserProfileFetchContract;
+import com.filmtime.model.Genre;
+import com.filmtime.model.GenresModel;
+import com.filmtime.model.PreferencesModel;
 import com.filmtime.model.UserProfileEditRequest;
 import com.filmtime.ui.UserProfileDisplay;
 import com.filmtime.api.ApiStatus;
 import com.filmtime.model.UserProfileModel;
 import com.filmtime.util.Util;
 
-public class ProfileEditActivity extends AppCompatActivity implements View.OnClickListener, UserProfileFetchContract, UserProfileEditContract {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+public class ProfileEditActivity extends AppCompatActivity implements View.OnClickListener,
+        UserProfileFetchContract, UserProfileEditContract, GenresFetchContract, PreferencesSaveContract {
+    private boolean needToFetchUserProfile = false;
     private UserProfileModel userProfileModel;
+    private GenresModel genresModel;
     private UserProfileDisplay userProfileDisplay;
     private EditText passwordEditText;
     private TextView emailTextView;
@@ -33,6 +51,7 @@ public class ProfileEditActivity extends AppCompatActivity implements View.OnCli
     private EditText countryEditText;
     private EditText bioEditText;
     private ImageView pfpImageView;
+    private HashMap<Integer, ToggleButton> genreButtons;
     private boolean changePassword;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,11 +81,99 @@ public class ProfileEditActivity extends AppCompatActivity implements View.OnCli
                 bioEditText, countryEditText, pfpImageView);
         userProfileModel = UserProfileModel.fromIntentExtra(getIntent());
 
+        genresModel = new GenresModel();
+        genresModel.getGenres(this, this);
+
         if (userProfileModel.isDataNull()) {
+            needToFetchUserProfile = true;
             userProfileModel.fetchUserProfileData(this, this);
         }
         else {
             userProfileDisplay.displayUserProfileData(userProfileModel.getUserProfileData());
+        }
+    }
+
+    private void createGenreButtons() {
+        genreButtons = new HashMap<>();
+
+        ConstraintLayout layout = findViewById(R.id.preferences_wrapper);
+        Flow flow = findViewById(R.id.preferences_container);
+
+        for (Genre genre : genresModel.getGenres()) {
+            ToggleButton button = new ToggleButton(new ContextThemeWrapper(this, R.style.GenreButtonStyle));
+            button.setId(View.generateViewId());
+
+            button.setTextOn(genre.getName());
+            button.setTextOff(genre.getName());
+            button.setOnCheckedChangeListener(new ToggleButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton button, boolean isChecked) {
+                    if (button.isChecked()) {
+                        button.setBackgroundResource(R.drawable.toggle_button_on_background);
+                        button.setTextColor(getResources().getColor(R.color.black, getTheme()));
+                    }
+                    else {
+                        button.setBackgroundResource(R.drawable.toggle_button_off_background);
+                        button.setTextColor(getResources().getColor(R.color.white, getTheme()));
+                    }
+                }
+            });
+            button.setChecked(true); // workaround to trigger onCheckedChanged
+            button.setChecked(false); //default state
+            genreButtons.put(genre.getId(), button);
+
+            layout.addView(button);
+
+            int[] existingIds = flow.getReferencedIds();
+            int[] newIds = Arrays.copyOf(existingIds, existingIds.length + 1);
+            newIds[newIds.length - 1] = button.getId();
+            flow.setReferencedIds(newIds);
+        }
+    }
+
+    private void setGenreButtons() {
+        for(Genre userGenre : userProfileModel.getUserProfileData().getGenres()) {
+            ToggleButton btn = genreButtons.get(userGenre.getId());
+            btn.setChecked(true);
+        }
+    }
+
+    @Override
+    public void onGenresFetchResponse(ApiStatus status) {
+        switch (status) {
+            case RESPONSE_OK: {
+                createGenreButtons();
+                if (!needToFetchUserProfile) {
+                    setGenreButtons();
+                }
+                break;
+            }
+            case FAILURE: {
+                Toast.makeText(this, "Failed to retrieve genres.", Toast.LENGTH_SHORT).show();
+                break;
+            }
+            case RESPONSE_ERR: {
+                Toast.makeText(this, "API error.", Toast.LENGTH_SHORT).show();
+                break;
+            }
+        }
+    }
+
+    @Override
+    public void onPreferencesSaveResponse(ApiStatus status) {
+        switch (status) {
+            case RESPONSE_OK: {
+                Toast.makeText(this, "Preferences updated", Toast.LENGTH_SHORT).show();
+                break;
+            }
+            case FAILURE: {
+                Toast.makeText(this, "Failed to retrieve genres.", Toast.LENGTH_SHORT).show();
+                break;
+            }
+            case RESPONSE_ERR: {
+                Toast.makeText(this, "API error.", Toast.LENGTH_SHORT).show();
+                break;
+            }
         }
     }
 
@@ -81,6 +188,9 @@ public class ProfileEditActivity extends AppCompatActivity implements View.OnCli
                     break;
                 }
 
+                PreferencesModel preferencesModel = new PreferencesModel();
+                preferencesModel.putUserPreferences(this, this, getSelectedGenreIds());
+
                 UserProfileEditRequest request = new UserProfileEditRequest(usernameEditText.getText().toString(),
                         countryEditText.getText().toString(),
                         bioEditText.getText().toString(),
@@ -94,6 +204,16 @@ public class ProfileEditActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
+    private int[] getSelectedGenreIds() {
+        ArrayList<Integer> genreIds = new ArrayList<>();
+        for (Map.Entry<Integer, ToggleButton> entry : genreButtons.entrySet()) {
+            if (entry.getValue().isChecked()) {
+                genreIds.add(entry.getKey());
+            }
+        }
+
+        return genreIds.stream().mapToInt(i -> i).toArray();
+    }
     @Override
     public void onUserProfileEditResponse(ApiStatus status) {
         switch (status) {
@@ -125,6 +245,7 @@ public class ProfileEditActivity extends AppCompatActivity implements View.OnCli
                     finishAndRemoveTask();
                 }
                 userProfileDisplay.displayUserProfileData(userProfileModel.getUserProfileData());
+                setGenreButtons();
                 break;
             }
             case RESPONSE_ERR:

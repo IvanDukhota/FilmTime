@@ -1,7 +1,5 @@
 package com.filmtime.ui;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -31,12 +29,7 @@ public class UserProfileDisplay {
             bioTextView.setText(userProfileData.getBio());
             countryTextView.setText(userProfileData.getCountry());
 
-            if (userProfileData.getProfilePicture() != null) {
-                Bitmap bmp = BitmapFactory.decodeByteArray(userProfileData.getProfilePicture(),
-                        0, userProfileData.getProfilePicture().length);
-                pfpImageView.setImageBitmap(Bitmap.createScaledBitmap(bmp, pfpImageView.getWidth(),
-                        pfpImageView.getHeight(), false));
-            }
+            //TODO: reimplement image fetching
         }
         catch (NullPointerException ex) {
             Log.e("PROFILE_EX", ex.getMessage());

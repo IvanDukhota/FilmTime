@@ -8,19 +8,20 @@ public class UserProfileResponse implements Serializable {
     private String username;
     private String country;
     private String bio;
-    private byte[] profile_picture;
+    private String profile_picture;
+    private Genre[] genres;
     private String role;
-
     private String status;
     public UserProfileResponse()
     { }
     public UserProfileResponse(String email, String username, String country, String bio,
-                               byte[] profilePicture, String role, String status) {
+                               String profilePicture, Genre[] genres, String role, String status) {
         this.email = email;
         this.username = username;
         this.country = country;
         this.bio = bio;
         this.profile_picture = profilePicture;
+        this.genres = genres;
         this.role = role;
         this.status = status;
     }
@@ -42,7 +43,7 @@ public class UserProfileResponse implements Serializable {
         this.bio = bio;
     }
 
-    public void setProfilePicture(byte[] profilePicture) {
+    public void setProfilePicture(String profilePicture) {
         this.profile_picture = profilePicture;
     }
 
@@ -66,7 +67,7 @@ public class UserProfileResponse implements Serializable {
         return bio;
     }
 
-    public byte[] getProfilePicture() {
+    public String getProfilePicture() {
         return profile_picture;
     }
 
@@ -81,4 +82,17 @@ public class UserProfileResponse implements Serializable {
     public void setStatus(String status) {
         this.status = status;
     }
+
+    public void setGenres(Genre[] genres) {
+        this.genres = genres;
+    }
+
+    public Genre[] getGenres() {
+        return genres;
+    }
+
+    public void setProfile_picture(String profile_picture) {
+        this.profile_picture = profile_picture;
+    }
+
 }
