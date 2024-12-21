@@ -13,9 +13,7 @@
         android:layout_height="match_parent"
         android:layout_centerInParent="true"
         android:orientation="vertical"
-        android:padding="16dp"
-        tools:layout_editor_absoluteX="16dp"
-        tools:layout_editor_absoluteY="-182dp">
+        android:padding="16dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -40,8 +38,18 @@
                 android:backgroundTint="#AAB1BB"
                 android:text="Upload new photo"
                 android:textColor="@color/white"
-                android:textSize="18dp" />
+                android:textSize="18sp" />
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/emailTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/rounded_background_dark"
+            android:padding="12dp"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white" />
 
         <EditText
             android:id="@+id/editTextUsername"

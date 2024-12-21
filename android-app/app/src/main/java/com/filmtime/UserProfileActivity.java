@@ -15,16 +15,16 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.filmtime.api.ApiConsumer;
+import com.filmtime.api.UserProfile.UserProfileFetchContract;
 import com.filmtime.model.UserProfileResponse;
 import com.filmtime.ui.UserProfileDisplay;
 import com.filmtime.api.ApiStatus;
 import com.filmtime.util.JwtManager;
-import com.filmtime.util.UserProfileManager;
+import com.filmtime.model.UserProfileModel;
 import com.filmtime.util.Util;
 
-public class UserProfileActivity extends AppCompatActivity implements View.OnClickListener, ApiConsumer {
-    private UserProfileManager userProfileManager;
+public class UserProfileActivity extends AppCompatActivity implements View.OnClickListener, UserProfileFetchContract {
+    private UserProfileModel userProfileModel;
     private UserProfileDisplay userProfileDisplay;
 
     @Override
@@ -61,28 +61,27 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void getUserProfileData() {
-        userProfileManager = UserProfileManager.fromIntentExtra(getIntent(), this);
+        userProfileModel = UserProfileModel.fromIntentExtra(getIntent());
 
-        if (userProfileManager.isDataNull()) {
-            userProfileManager.fetchUserProfileData(this);
+        if (userProfileModel.isDataNull()) {
+            userProfileModel.fetchUserProfileData(this, this);
         }
         else {
-            userProfileDisplay.displayUserProfileData(userProfileManager.getUserProfileData());
+            userProfileDisplay.displayUserProfileData(userProfileModel.getUserProfileData());
         }
     }
 
-    //todo: rewrite after creating contract interface
     @Override
-    public void onResponse(ApiStatus status) {
+    public void onUserProfileFetchResponse(ApiStatus status) {
         switch (status) {
             case RESPONSE_OK: {
-                if (userProfileManager.isDataNull()) {
+                if (userProfileModel.isDataNull()) {
                     Log.e("API_ERROR", "User profile fetch returned null.");
                     Toast.makeText(this,
                             "Error: failed to fetch user profile.", Toast.LENGTH_SHORT).show();
                     Util.redirectToActivity(this, LoginActivity.class);
                 }
-                userProfileDisplay.displayUserProfileData(userProfileManager.getUserProfileData());
+                userProfileDisplay.displayUserProfileData(userProfileModel.getUserProfileData());
                 break;
             }
             case FAILURE:
@@ -97,7 +96,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         switch (v.getId()) {
             case R.id.buttonEditProfile: {
                 Intent intent = new Intent(this, ProfileEditActivity.class);
-                intent.putExtra(UserProfileResponse.EXTRA_KEY, userProfileManager.getUserProfileData());
+                intent.putExtra(UserProfileResponse.EXTRA_KEY, userProfileModel.getUserProfileData());
                 startActivity(intent);
                 break;
             }

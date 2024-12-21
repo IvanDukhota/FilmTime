@@ -71,6 +71,7 @@
             android:backgroundTint="#AAB1BB"
             android:textColor="#232323"
             android:textSize="30sp"
+            android:background="@drawable/rounded_button_border"
             android:text="Login" />
 
         <LinearLayout
@@ -84,6 +85,7 @@
             <Button
                 android:id="@+id/buttonLoginGoogle"
                 android:drawableLeft="@drawable/google_icon"
+                android:background="@drawable/rounded_button_border"
                 android:layout_width="0dp"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="5dp"
@@ -97,6 +99,7 @@
             <Button
                 android:id="@+id/buttonLoginFacebook"
                 android:drawableLeft="@drawable/facebook_icon"
+                android:background="@drawable/rounded_button_border"
                 android:layout_width="0dp"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="10dp"

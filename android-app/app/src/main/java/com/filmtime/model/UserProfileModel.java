@@ -1,96 +1,92 @@
-package com.filmtime.util;
+package com.filmtime.model;
 
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
-import android.widget.Toast;
 
-import com.filmtime.api.ApiConsumer;
+import com.filmtime.api.UserProfile.UserProfileEditContract;
+import com.filmtime.api.UserProfile.UserProfileFetchContract;
 import com.filmtime.api.ApiService;
 import com.filmtime.api.ApiStatus;
 import com.filmtime.api.AuthInterceptor;
 import com.filmtime.api.RetrofitClient;
-import com.filmtime.model.UserProfileEditRequest;
-import com.filmtime.model.UserProfileEditResponse;
-import com.filmtime.model.UserProfileResponse;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class UserProfileManager {
-    private ApiConsumer consumer;
+public class UserProfileModel {
     private UserProfileResponse userProfileData;
     public UserProfileResponse getUserProfileData() {
         return userProfileData;
     }
 
-    public UserProfileManager(UserProfileResponse userProfileResponse, ApiConsumer consumer) {
+    public UserProfileModel()
+    { }
+
+    public UserProfileModel(UserProfileResponse userProfileResponse) {
         userProfileData = userProfileResponse;
-        this.consumer = consumer;
     }
 
-    public void setConsumer(ApiConsumer consumer) {
-        this.consumer = consumer;
-    }
     public void setUserProfileData(UserProfileResponse userProfileData) {
         this.userProfileData = userProfileData;
     }
 
-    public static UserProfileManager fromIntentExtra(Intent intent, ApiConsumer consumer) {
+    public static UserProfileModel fromIntentExtra(Intent intent) {
         UserProfileResponse userProfileData = (UserProfileResponse) intent.getSerializableExtra(UserProfileResponse.EXTRA_KEY);
-        return new UserProfileManager(userProfileData, consumer);
+        return new UserProfileModel(userProfileData);
     }
 
     public boolean isDataNull() {
         return userProfileData == null;
     }
 
-    public void fetchUserProfileData(Context context) {
+    public void fetchUserProfileData(Context context, UserProfileFetchContract consumer) {
         ApiService apiService = RetrofitClient.getInstance(new AuthInterceptor(context)).create(ApiService.class);
         apiService.getUserProfile().enqueue(new Callback<UserProfileResponse>() {
             @Override
             public void onResponse(Call<UserProfileResponse> call, Response<UserProfileResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     userProfileData = (UserProfileResponse) response.body();
-                    consumer.onResponse(ApiStatus.RESPONSE_OK);
+                    consumer.onUserProfileFetchResponse(ApiStatus.RESPONSE_OK);
                 } else {
                     Log.e("API_ERROR", "Error code: " + response.code());
                     if (response.errorBody() != null) {
                         Log.e("API_ERROR", "Error: " + response.errorBody());
                     }
-                    consumer.onResponse(ApiStatus.RESPONSE_ERR);
+                    consumer.onUserProfileFetchResponse(ApiStatus.RESPONSE_ERR);
                 }
             }
             @Override
             public void onFailure(Call<UserProfileResponse> call, Throwable t) {
                 Log.e("API_FAILURE", "Error: " + t.getMessage());
-                consumer.onResponse(ApiStatus.FAILURE);
+                consumer.onUserProfileFetchResponse(ApiStatus.FAILURE);
             }
         });
     }
 
-    public void editUserProfileData(Context context, UserProfileEditRequest userProfileEditRequest) {
+    public void editUserProfileData(Context context, UserProfileEditContract consumer,
+                                    UserProfileEditRequest userProfileEditRequest) {
         ApiService apiService = RetrofitClient.getInstance(new AuthInterceptor(context)).create(ApiService.class);
         apiService.editUserProfile(userProfileEditRequest).enqueue(new Callback<UserProfileEditResponse>() {
             @Override
             public void onResponse(Call<UserProfileEditResponse> call, Response<UserProfileEditResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     Log.i("API_LOG", response.body().getMessage());
-                    consumer.onResponse(ApiStatus.RESPONSE_OK);
+                    consumer.onUserProfileEditResponse(ApiStatus.RESPONSE_OK);
                 } else {
                     Log.e("API_ERROR", "Error code: " + response.code());
                     if (response.errorBody() != null) {
                         Log.e("API_ERROR", "Error: " + response.errorBody());
                     }
-                    consumer.onResponse(ApiStatus.RESPONSE_ERR);
+                    consumer.onUserProfileEditResponse(ApiStatus.RESPONSE_ERR);
                 }
             }
             @Override
             public void onFailure(Call<UserProfileEditResponse> call, Throwable t) {
                 Log.e("API_ERROR", "Error: " + t.getMessage());
                 t.printStackTrace();
-                consumer.onResponse(ApiStatus.FAILURE);
+                consumer.onUserProfileEditResponse(ApiStatus.FAILURE);
             }
         });
     }

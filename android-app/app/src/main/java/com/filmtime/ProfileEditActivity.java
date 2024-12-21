@@ -1,12 +1,12 @@
 package com.filmtime;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -15,19 +15,19 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.filmtime.api.ApiConsumer;
+import com.filmtime.api.UserProfile.UserProfileEditContract;
+import com.filmtime.api.UserProfile.UserProfileFetchContract;
 import com.filmtime.model.UserProfileEditRequest;
-import com.filmtime.model.UserProfileResponse;
 import com.filmtime.ui.UserProfileDisplay;
 import com.filmtime.api.ApiStatus;
-import com.filmtime.util.UserProfileManager;
+import com.filmtime.model.UserProfileModel;
 import com.filmtime.util.Util;
 
-public class ProfileEditActivity extends AppCompatActivity implements View.OnClickListener, ApiConsumer {
-    private UserProfileManager userProfileManager;
+public class ProfileEditActivity extends AppCompatActivity implements View.OnClickListener, UserProfileFetchContract, UserProfileEditContract {
+    private UserProfileModel userProfileModel;
     private UserProfileDisplay userProfileDisplay;
     private EditText passwordEditText;
-    private EditText emailEditText;
+    private TextView emailTextView;
     private EditText passwordRepeatEditText;
     private EditText usernameEditText;
     private EditText countryEditText;
@@ -50,6 +50,7 @@ public class ProfileEditActivity extends AppCompatActivity implements View.OnCli
         Button saveButton = (Button) findViewById(R.id.buttonSaveEdited);
         saveButton.setOnClickListener(this);
 
+        emailTextView = (TextView) findViewById(R.id.emailTextView);
         passwordEditText = (EditText) findViewById(R.id.editTextPassword);
         passwordRepeatEditText = (EditText) findViewById(R.id.editTextRepeatPassword);
         usernameEditText = (EditText) findViewById(R.id.editTextUsername);
@@ -57,16 +58,15 @@ public class ProfileEditActivity extends AppCompatActivity implements View.OnCli
         bioEditText = (EditText) findViewById(R.id.editTextBio);
         pfpImageView = (ImageView) findViewById(R.id.pfpImageEdit);
 
-        userProfileDisplay = new UserProfileDisplay(usernameEditText, emailEditText,
+        userProfileDisplay = new UserProfileDisplay(usernameEditText, emailTextView,
                 bioEditText, countryEditText, pfpImageView);
-        userProfileManager = UserProfileManager.fromIntentExtra(getIntent(), this);
+        userProfileModel = UserProfileModel.fromIntentExtra(getIntent());
 
-        if (userProfileManager.isDataNull()) {
-            userProfileManager.fetchUserProfileData(this);
-            //TODO: do smth when contractor is created
+        if (userProfileModel.isDataNull()) {
+            userProfileModel.fetchUserProfileData(this, this);
         }
         else {
-            userProfileDisplay.displayUserProfileData(userProfileManager.getUserProfileData());
+            userProfileDisplay.displayUserProfileData(userProfileModel.getUserProfileData());
         }
     }
 
@@ -88,14 +88,14 @@ public class ProfileEditActivity extends AppCompatActivity implements View.OnCli
                 if (changePassword)
                     request.setPassword(passwordEditText.getText().toString());
 
-                userProfileManager.editUserProfileData(this, request);
+                userProfileModel.editUserProfileData(this, this, request);
                 break;
             }
         }
     }
 
     @Override
-    public void onResponse(ApiStatus status) {
+    public void onUserProfileEditResponse(ApiStatus status) {
         switch (status) {
             case RESPONSE_OK: {
                 Toast.makeText(this, "Data modified successfully!", Toast.LENGTH_SHORT).show();
@@ -109,6 +109,27 @@ public class ProfileEditActivity extends AppCompatActivity implements View.OnCli
             }
             case RESPONSE_ERR: {
                 Toast.makeText(this, "API error.", Toast.LENGTH_SHORT).show();
+                break;
+            }
+        }
+    }
+
+    @Override
+    public void onUserProfileFetchResponse(ApiStatus status) {
+        switch (status) {
+            case RESPONSE_OK: {
+                if (userProfileModel.isDataNull()) {
+                    Log.e("API_ERROR", "User profile fetch returned null.");
+                    Toast.makeText(this,
+                            "Error: failed to fetch user profile.", Toast.LENGTH_SHORT).show();
+                    finishAndRemoveTask();
+                }
+                userProfileDisplay.displayUserProfileData(userProfileModel.getUserProfileData());
+                break;
+            }
+            case RESPONSE_ERR:
+            case FAILURE: {
+                finishAndRemoveTask();
                 break;
             }
         }
