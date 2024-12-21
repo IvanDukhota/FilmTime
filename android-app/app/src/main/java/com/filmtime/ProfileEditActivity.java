@@ -40,6 +40,7 @@ import java.util.Map;
 
 public class ProfileEditActivity extends AppCompatActivity implements View.OnClickListener,
         UserProfileFetchContract, UserProfileEditContract, GenresFetchContract, PreferencesSaveContract {
+    // necessary to determine when to apply user's preferences on collection of buttons
     private boolean needToFetchUserProfile = false;
     private UserProfileModel userProfileModel;
     private GenresModel genresModel;

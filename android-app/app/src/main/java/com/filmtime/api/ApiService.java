@@ -5,6 +5,7 @@ import com.filmtime.model.LoginRequest;
 import com.filmtime.model.LoginResponse;
 import com.filmtime.model.MessageResponse;
 import com.filmtime.model.PreferencesSaveRequest;
+import com.filmtime.model.RefreshTokenRequest;
 import com.filmtime.model.RegisterRequest;
 import com.filmtime.model.UserProfileEditRequest;
 import com.filmtime.model.UserProfileEditResponse;
@@ -31,7 +32,7 @@ public interface ApiService {
     Call<UserProfileEditResponse> editUserProfile(@Body UserProfileEditRequest userProfileEditRequest);
 
     @POST("/api/v1/registration/token/refresh/")
-    Call<LoginResponse> refreshToken(@Body String refresh);
+    Call<LoginResponse> refreshToken(@Body RefreshTokenRequest refresh);
 
     @GET("/api/v1/content/genres/")
     Call<Genre[]> getGenres();

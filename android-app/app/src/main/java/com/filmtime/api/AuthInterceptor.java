@@ -3,6 +3,7 @@ package com.filmtime.api;
 import android.content.Context;
 
 import com.filmtime.model.LoginResponse;
+import com.filmtime.model.RefreshTokenRequest;
 import com.filmtime.util.JwtManager;
 import com.filmtime.util.Constants;
 
@@ -64,7 +65,9 @@ public class AuthInterceptor implements Interceptor {
             return null;
         }
         try {
-            retrofit2.Response<LoginResponse> response = apiService.refreshToken(refreshToken).execute();
+            retrofit2.Response<LoginResponse> response = apiService
+                    .refreshToken(new RefreshTokenRequest(refreshToken))
+                    .execute();
             if (response.isSuccessful() && response.body() != null) {
                 return response.body().getAccess();
             }
