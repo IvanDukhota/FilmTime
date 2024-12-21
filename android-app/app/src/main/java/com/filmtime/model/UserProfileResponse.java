@@ -12,6 +12,8 @@ public class UserProfileResponse implements Serializable {
     private String role;
 
     private String status;
+    public UserProfileResponse()
+    { }
     public UserProfileResponse(String email, String username, String country, String bio,
                                byte[] profilePicture, String role, String status) {
         this.email = email;

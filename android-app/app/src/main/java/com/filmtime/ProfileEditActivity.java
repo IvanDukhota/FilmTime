@@ -1,12 +1,12 @@
 package com.filmtime;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
-import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -15,26 +15,24 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.filmtime.api.ApiService;
-import com.filmtime.api.AuthInterceptor;
-import com.filmtime.api.RetrofitClient;
+import com.filmtime.api.ApiConsumer;
 import com.filmtime.model.UserProfileEditRequest;
 import com.filmtime.model.UserProfileResponse;
+import com.filmtime.ui.UserProfileDisplay;
+import com.filmtime.api.ApiStatus;
 import com.filmtime.util.UserProfileManager;
 import com.filmtime.util.Util;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-public class ProfileEditActivity extends AppCompatActivity implements View.OnClickListener {
+public class ProfileEditActivity extends AppCompatActivity implements View.OnClickListener, ApiConsumer {
     private UserProfileManager userProfileManager;
+    private UserProfileDisplay userProfileDisplay;
     private EditText passwordEditText;
     private EditText emailEditText;
     private EditText passwordRepeatEditText;
     private EditText usernameEditText;
     private EditText countryEditText;
     private EditText bioEditText;
+    private ImageView pfpImageView;
     private boolean changePassword;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,27 +55,18 @@ public class ProfileEditActivity extends AppCompatActivity implements View.OnCli
         usernameEditText = (EditText) findViewById(R.id.editTextUsername);
         countryEditText = (EditText) findViewById(R.id.editTextCountry);
         bioEditText = (EditText) findViewById(R.id.editTextBio);
+        pfpImageView = (ImageView) findViewById(R.id.pfpImageEdit);
 
-        userProfileManager = UserProfileManager.fromIntentExtra(getIntent());
+        userProfileDisplay = new UserProfileDisplay(usernameEditText, emailEditText,
+                bioEditText, countryEditText, pfpImageView);
+        userProfileManager = UserProfileManager.fromIntentExtra(getIntent(), this);
+
         if (userProfileManager.isDataNull()) {
-            userProfileManager.fetchUserProfileData(this,
-                    () -> {
-                        if (userProfileManager.isDataNull()) {
-                            Log.e("API_ERROR", "User profile fetch returned null.");
-                            Toast.makeText(ProfileEditActivity.this,
-                                    "Error: failed to fetch user profile.", Toast.LENGTH_SHORT).show();
-                            finish();
-                        }
-                        userProfileManager.displayUserProfileData(usernameEditText, emailEditText,
-                                bioEditText, countryEditText);
-                    },
-                    this::finish,
-                    this::finish
-            );
+            userProfileManager.fetchUserProfileData(this);
+            //TODO: do smth when contractor is created
         }
         else {
-            userProfileManager.displayUserProfileData(usernameEditText, emailEditText,
-                    bioEditText, countryEditText);
+            userProfileDisplay.displayUserProfileData(userProfileManager.getUserProfileData());
         }
     }
 
@@ -99,22 +88,32 @@ public class ProfileEditActivity extends AppCompatActivity implements View.OnCli
                 if (changePassword)
                     request.setPassword(passwordEditText.getText().toString());
 
-                userProfileManager.editUserProfileData(this,
-                        request,
-                        () -> {
-                            Toast.makeText(this, "Data modified successfully!", Toast.LENGTH_SHORT).show();
-                            Util.redirectToActivity(this, UserProfileActivity.class);
-                        },
-                        () -> {
-                            Toast.makeText(this, "Data modification error.", Toast.LENGTH_SHORT).show();
-                        },
-                        () -> {
-                            Toast.makeText(this, "API error.", Toast.LENGTH_SHORT).show();
-                        });
+                userProfileManager.editUserProfileData(this, request);
                 break;
             }
         }
     }
+
+    @Override
+    public void onResponse(ApiStatus status) {
+        switch (status) {
+            case RESPONSE_OK: {
+                Toast.makeText(this, "Data modified successfully!", Toast.LENGTH_SHORT).show();
+                Util.redirectToActivity(this, UserProfileActivity.class);
+                finishAndRemoveTask();
+                break;
+            }
+            case FAILURE: {
+                Toast.makeText(this, "Data modification error.", Toast.LENGTH_SHORT).show();
+                break;
+            }
+            case RESPONSE_ERR: {
+                Toast.makeText(this, "API error.", Toast.LENGTH_SHORT).show();
+                break;
+            }
+        }
+    }
+
     private boolean isInputDataValid() {
         changePassword = true;
         if (passwordEditText.getText().toString().isEmpty()) {

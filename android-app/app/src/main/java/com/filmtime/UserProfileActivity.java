@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -14,20 +15,17 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.filmtime.api.ApiService;
-import com.filmtime.api.AuthInterceptor;
-import com.filmtime.api.RetrofitClient;
+import com.filmtime.api.ApiConsumer;
 import com.filmtime.model.UserProfileResponse;
+import com.filmtime.ui.UserProfileDisplay;
+import com.filmtime.api.ApiStatus;
 import com.filmtime.util.JwtManager;
 import com.filmtime.util.UserProfileManager;
 import com.filmtime.util.Util;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-public class UserProfileActivity extends AppCompatActivity implements View.OnClickListener {
+public class UserProfileActivity extends AppCompatActivity implements View.OnClickListener, ApiConsumer {
     private UserProfileManager userProfileManager;
+    private UserProfileDisplay userProfileDisplay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,31 +48,48 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         TextView emailTextView = (TextView) findViewById(R.id.emailTextView);
         TextView countryTextView = (TextView) findViewById(R.id.countryTextView);
         TextView bioTextView = (TextView) findViewById(R.id.bioTextView);
+        ImageView pfpImageView = (ImageView) findViewById(R.id.pfpImageView);
 
-        userProfileManager = UserProfileManager.fromIntentExtra(getIntent());
+        userProfileDisplay = new UserProfileDisplay(usernameTextView, emailTextView, bioTextView,
+                countryTextView, pfpImageView);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        getUserProfileData();
+    }
+
+    private void getUserProfileData() {
+        userProfileManager = UserProfileManager.fromIntentExtra(getIntent(), this);
+
         if (userProfileManager.isDataNull()) {
-            userProfileManager.fetchUserProfileData(this,
-                    () -> {
-                        if (userProfileManager.isDataNull()) {
-                            Log.e("API_ERROR", "User profile fetch returned null.");
-                            Toast.makeText(UserProfileActivity.this,
-                                    "Error: failed to fetch user profile.", Toast.LENGTH_SHORT).show();
-                            Util.redirectToActivity(UserProfileActivity.this, MainActivity.class);
-                        }
-                        userProfileManager.displayUserProfileData(usernameTextView, emailTextView,
-                                bioTextView, countryTextView);
-                    },
-                    () -> {
-                        Util.redirectToActivity(UserProfileActivity.this, LoginActivity.class);
-                    },
-                    () -> {
-                        Util.redirectToActivity(UserProfileActivity.this, LoginActivity.class);
-                    }
-            );
+            userProfileManager.fetchUserProfileData(this);
         }
         else {
-            userProfileManager.displayUserProfileData(usernameTextView, emailTextView,
-                    bioTextView, countryTextView);
+            userProfileDisplay.displayUserProfileData(userProfileManager.getUserProfileData());
+        }
+    }
+
+    //todo: rewrite after creating contract interface
+    @Override
+    public void onResponse(ApiStatus status) {
+        switch (status) {
+            case RESPONSE_OK: {
+                if (userProfileManager.isDataNull()) {
+                    Log.e("API_ERROR", "User profile fetch returned null.");
+                    Toast.makeText(this,
+                            "Error: failed to fetch user profile.", Toast.LENGTH_SHORT).show();
+                    Util.redirectToActivity(this, LoginActivity.class);
+                }
+                userProfileDisplay.displayUserProfileData(userProfileManager.getUserProfileData());
+                break;
+            }
+            case FAILURE:
+            case RESPONSE_ERR: {
+                Util.redirectToActivity(this, LoginActivity.class);
+                break;
+            }
         }
     }
 
@@ -91,6 +106,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 jwtManager.deleteAccessToken();
                 jwtManager.deleteRefreshToken();
                 Util.redirectToActivity(this, LoginActivity.class);
+                finishAndRemoveTask();
                 break;
             }
         }
