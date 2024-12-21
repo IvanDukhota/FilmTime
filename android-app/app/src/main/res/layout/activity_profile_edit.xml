@@ -123,7 +123,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:columnCount="3"
-                android:gap="8dp"
                 android:rowCount="4">
 
                 <!-- Buttons for genres -->
@@ -223,7 +222,7 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/btn_cancel"
+                android:id="@+id/buttonCancelEdit"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
@@ -235,7 +234,7 @@
                 android:textColor="@color/white" />
 
             <Button
-                android:id="@+id/btn_edit"
+                android:id="@+id/buttonSaveEdited"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"

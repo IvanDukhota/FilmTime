@@ -55,7 +55,6 @@ public class ProfileEditActivity extends AppCompatActivity implements View.OnCli
         passwordEditText = (EditText) findViewById(R.id.editTextPassword);
         passwordRepeatEditText = (EditText) findViewById(R.id.editTextRepeatPassword);
         usernameEditText = (EditText) findViewById(R.id.editTextUsername);
-        emailEditText = (EditText) findViewById(R.id.editTextEmailAddress);
         countryEditText = (EditText) findViewById(R.id.editTextCountry);
         bioEditText = (EditText) findViewById(R.id.editTextBio);
 
