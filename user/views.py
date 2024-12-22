@@ -1,13 +1,26 @@
+from sys import api_version
+import stripe
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from .permissions import IsAdminOrModerator
 from rest_framework import status, generics, permissions
+import time
+import hashlib
+from django.http import JsonResponse
 from django.utils import timezone
 from DataBase.models import *
 from .serializers import *
 from .permissions import IsAdminUser
 
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from django.views import View
+import json
+
+from django.shortcuts import get_object_or_404
+from django.utils.timezone import now
 
 class UserHistoryView(APIView):
     permission_classes = [IsAuthenticated]
@@ -153,7 +166,7 @@ class GetCommentsView(generics.ListAPIView):
 
 
 class DeleteCommentView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAdminOrModerator]
 
     def delete(self, request, *args, **kwargs):
         content_id = request.data.get('content_id')
@@ -165,62 +178,50 @@ class DeleteCommentView(APIView):
         try:
             content = Content.objects.get(id=content_id)
         except Content.DoesNotExist:
-            return Response({'error': 'Content не найден.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Контент не найден.'}, status=status.HTTP_404_NOT_FOUND)
 
         try:
-            user_content_info = UserProfileContentInfo.objects.get(id=comment_id, content=content)
+            comment = UserProfileContentInfo.objects.get(id=comment_id, content=content)
         except UserProfileContentInfo.DoesNotExist:
             return Response({'error': 'Комментарий не найден.'}, status=status.HTTP_404_NOT_FOUND)
 
-        if not request.user.role in ['moderator', 'admin']:
-            return Response({'error': 'Недостаточно прав для удаления комментария.'}, status=status.HTTP_403_FORBIDDEN)
-
-        user_content_info.delete()
+        comment.delete()
 
         return Response({'message': 'Комментарий успешно удален.'}, status=status.HTTP_200_OK)
 
-
-class BanUserView(generics.UpdateAPIView):
-    permission_classes = [IsAdminUser]
-    queryset = User.objects.all()
-    serializer_class = None
+class BanUserView(APIView):
+    permission_classes = [IsAdminOrModerator]
 
     def patch(self, request, *args, **kwargs):
         user_id = request.data.get('user_id')
         action = request.data.get('action')
 
         if user_id is None:
-            return Response({'error': 'Необхідно вказати user_id для зміни статусу.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Необходимо указать user_id для изменения статуса.'}, status=status.HTTP_400_BAD_REQUEST)
 
         if action not in ['ban', 'unban']:
-            return Response({'error': 'Невірна дія. Дозволені значення: "ban" або "unban".'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Неверная операция. Допустимые значения: "ban" или "unban".'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             user = User.objects.get(id=user_id)
         except User.DoesNotExist:
-            return Response({'error': 'Користувач не знайдений.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Пользователь не найден.'}, status=status.HTTP_404_NOT_FOUND)
 
         if action == 'ban':
             if user.is_banned:
-                return Response({'error': 'Користувач вже заблокований.'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': 'Пользователь уже заблокирован.'}, status=status.HTTP_400_BAD_REQUEST)
 
             user.is_banned = True
             user.save()
-            return Response({'message': f'Користувач {user.email} забанений успішно.'}, status=status.HTTP_200_OK)
+            return Response({'message': f'Пользователь {user.email} успешно заблокирован.'}, status=status.HTTP_200_OK)
 
         if action == 'unban':
             if not user.is_banned:
-                return Response({'error': 'Користувач не заблокований.'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': 'Пользователь не заблокирован.'}, status=status.HTTP_400_BAD_REQUEST)
 
             user.is_banned = False
             user.save()
-            return Response({'message': f'Користувач {user.email} розбанений успішно.'}, status=status.HTTP_200_OK)
-
-
-
-
-
-    
+            return Response({'message': f'Пользователь {user.email} успешно разблокирован.'}, status=status.HTTP_200_OK)
 
 
 class UserNotificationsView(generics.ListAPIView):
@@ -260,3 +261,161 @@ class UserProfileNotificationUpdateView(generics.UpdateAPIView):
 
     def get_queryset(self):
         return UserProfileNotifications.objects.filter(userprofile=self.request.user.userprofile)
+
+
+def subscription_plans_view(request):
+    plans = SubscriptionPlan.objects.all()
+    plans_data = [
+        {
+            "id": plan.id,
+            "plan_type": plan.get_plan_type_display(),
+            "price_per_month": float(plan.price_per_month),
+            "description": plan.description,
+            "duration_in_months": plan.duration_in_months,
+            "total_price": float(plan.total_price),
+        }
+        for plan in plans
+    ]
+    return JsonResponse({"plans": plans_data}, safe=False)
+
+
+
+STRIPE_TEST_PUBLIC_KEY = 'pk_test_51QYmu1CdDegJBuD6Ydmvn4KDSC31DZbSxFhAjkygwubSIO00rPy8sszIi3Dz1YJKGhexDsMKoJbrFRDoxJxkEhPY00bUcsa4Aj'
+STRIPE_TEST_SECRET_KEY = 'sk_test_51QYmu1CdDegJBuD6fDPBigted2FjHVx8za9ZJL8EW3LuponYBovbvZcQnYG1fFDXylVM3mQqVwkoUBMMnFYu3QgT00QR2n6LJn'
+
+
+stripe.api_key = STRIPE_TEST_SECRET_KEY
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class CreateCheckoutSessionView(View):
+    def post(self, request, *args, **kwargs):
+        YOUR_DOMAIN = "http://127.0.0.1:8000/api/v1/user"
+        try:
+            data = json.loads(request.body)
+
+            auth_header = request.headers.get('Authorization')
+            if not auth_header or not auth_header.startswith('Bearer '):
+                return JsonResponse({'error': 'Authorization token not provided'}, status=401)
+
+            token = auth_header.split(' ')[1]
+
+            from rest_framework_simplejwt.tokens import UntypedToken
+            from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+            from rest_framework_simplejwt.authentication import JWTAuthentication
+
+            try:
+                UntypedToken(token)
+                jwt_auth = JWTAuthentication()
+                validated_token = jwt_auth.get_validated_token(token)
+                user = jwt_auth.get_user(validated_token)
+            except (InvalidToken, TokenError):
+                return JsonResponse({'error': 'Invalid token'}, status=401)
+
+            plan = SubscriptionPlan.objects.get(id=data['plan_id'])
+
+            checkout_session = stripe.checkout.Session.create(
+                payment_method_types=['card'],
+                line_items=[{
+                    'price_data': {
+                        'currency': 'uah',
+                        'product_data': {
+                            'name': plan.plan_type,
+                            'description': plan.description
+                        },
+                        'unit_amount': int(plan.price_per_month * 100),
+                    },
+                    'quantity': 1,
+                }],
+                mode='payment',
+                success_url=f"{YOUR_DOMAIN}/success/?token={token}&plan_id={data['plan_id']}",
+                cancel_url=f"{YOUR_DOMAIN}/cancel/?token={token}&plan_id={data['plan_id']}",
+            )
+
+            return JsonResponse({'url': checkout_session.url})
+        except SubscriptionPlan.DoesNotExist:
+            return JsonResponse({'error': 'Invalid plan ID'}, status=400)
+        except stripe.error.StripeError as e:
+            return JsonResponse({'error': f'Stripe Error: {str(e)}'}, status=500)
+        except Exception as e:
+            return JsonResponse({'error': f'Unexpected Error: {str(e)}'}, status=500)
+
+
+from django.http import HttpResponseRedirect
+
+class SuccessView(APIView):
+    def get(self, request, *args, **kwargs):
+        token = request.query_params.get('token')
+        plan_id = request.query_params.get('plan_id')
+        if not token:
+            return Response({"detail": "Token not provided."}, status=status.HTTP_401_UNAUTHORIZED)
+        if not plan_id:
+            return Response({"detail": "Plan ID not provided."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            from rest_framework_simplejwt.tokens import UntypedToken
+            from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+            from rest_framework_simplejwt.authentication import JWTAuthentication
+
+            UntypedToken(token)
+            jwt_auth = JWTAuthentication()
+            validated_token = jwt_auth.get_validated_token(token)
+            user = jwt_auth.get_user(validated_token)
+        except (InvalidToken, TokenError):
+            return Response({"detail": "Invalid token."}, status=status.HTTP_401_UNAUTHORIZED)
+
+        subscription_plan = get_object_or_404(SubscriptionPlan, id=plan_id)
+
+        if UserSubscription.objects.filter(user=user, is_active=True).exists():
+            return HttpResponseRedirect('http://localhost:3000/views/user_profile.php?status=exists')
+
+        UserSubscription.objects.create(
+            user=user,
+            plan=subscription_plan,
+            purchase_date=now(),
+            is_active=True,
+        )
+
+        return HttpResponseRedirect('http://localhost:3000/views/user_profile.php?status=success') 
+
+class CancelView(APIView):
+    def get(self, request, *args, **kwargs):
+        token = request.query_params.get('token')
+        if not token:
+            return Response({"detail": "Token not provided."}, status=status.HTTP_401_UNAUTHORIZED)
+
+        return Response(
+            {"detail": "Payment process was canceled."},
+            status=status.HTTP_200_OK
+        )
+
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.utils.timezone import now
+
+
+class CheckSubscriptionView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+
+        try:
+            subscription = user.user_subscription
+            if subscription.is_active and not subscription.is_expired:
+                expiration_date = subscription.expiration_date
+                remaining_days = (expiration_date - now()).days
+                return Response({
+                    "has_subscription": True,
+                    "remaining_days": remaining_days
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({
+                    "has_subscription": False,
+                    "remaining_days": 0
+                }, status=status.HTTP_200_OK)
+        except UserSubscription.DoesNotExist:
+            return Response({
+                "has_subscription": False,
+                "remaining_days": 0
+            }, status=status.HTTP_200_OK)

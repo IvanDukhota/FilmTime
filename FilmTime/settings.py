@@ -108,7 +108,7 @@ REST_FRAMEWORK = {
 
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=3000),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'AUTH_HEADER_TYPES': ('Bearer',),
     'USER_ID_FIELD': 'id',
@@ -147,6 +147,8 @@ USE_I18N = True
 
 USE_TZ = True
 
+WAYFORPAY_MERCHANT_ACCOUNT = os.getenv('WAYFORPAY_MERCHANT_ACCOUNT', '127_0_0_132')
+WAYFORPAY_SECRET_KEY = os.getenv('WAYFORPAY_SECRET_KEY', '2386813b30d9d6df5f58b53a3c4f9c0ab1f41b61')
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/

@@ -1,3 +1,4 @@
+from datetime import timedelta, datetime
 from django.db import models
 from django.contrib.auth.models import (
     AbstractBaseUser,
@@ -6,7 +7,8 @@ from django.contrib.auth.models import (
 )
 from uuid import uuid4
 import os
-
+from django.conf import settings
+from django.utils import timezone 
 
 # User Manager
 class UserManager(BaseUserManager):
@@ -75,9 +77,6 @@ class UserProfile(models.Model):
     status = models.CharField(
         max_length=10, choices=[("active", "Active"), ("banned", "Banned")]
     )
-    subscription = models.ForeignKey(
-        "Subscription", on_delete=models.SET_NULL, null=True, blank=True
-    )
 
     def save(self, *args, **kwargs):
         try:
@@ -94,14 +93,55 @@ class UserProfile(models.Model):
 
 
 # Subscription Model
-class Subscription(models.Model):
-    name = models.CharField(max_length=50)
-    level = models.CharField(max_length=20)
-    term_of_usage = models.TextField()
-    purchase_date = models.DateTimeField(auto_now_add=True)
+class SubscriptionPlan(models.Model):
+    PLAN_CHOICES = [
+        ("flexible", "Flexible Plan"),
+        ("semi_annual", "6-Month Plan"),
+        ("annual", "Annual Plan"),
+    ]
+    plan_type = models.CharField(
+        max_length=20, choices=PLAN_CHOICES, unique=True
+    )
+    price_per_month = models.DecimalField(
+        max_digits=10, decimal_places=2
+    )
+    description = models.TextField()
+    duration_in_months = models.PositiveIntegerField()
+
+    @property
+    def total_price(self):
+        return self.price_per_month * self.duration_in_months
 
     def __str__(self):
-        return self.name
+        return f"{self.get_plan_type_display()} - ₴{self.price_per_month}/month"
+
+
+class UserSubscription(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="user_subscription",
+    )
+    plan = models.ForeignKey(
+        SubscriptionPlan, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    purchase_date = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.user.email} - {self.plan.get_plan_type_display() if self.plan else 'No Plan'}"
+
+    @property
+    def expiration_date(self):
+        if self.plan and self.plan.duration_in_months:
+            return self.purchase_date + timedelta(days=self.plan.duration_in_months * 30)
+        return None
+
+    @property
+    def is_expired(self):
+        expiration_date = self.expiration_date
+        return expiration_date and expiration_date < timezone.now()
+
 
 
 # Genre Model

@@ -15,7 +15,7 @@ import json
 from urllib.parse import urlencode
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated 
 from rest_framework.decorators import api_view
 from DataBase.models import Content
 from django.core.files.base import ContentFile
@@ -401,19 +401,14 @@ class UpdateUserGenresView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-      
         current_genres = UserGenres.objects.filter(userprofile=user_profile).values_list('genre_id', flat=True)
 
-     
         genres_to_add = set(new_genre_ids) - set(current_genres)
 
-     
         genres_to_remove = set(current_genres) - set(new_genre_ids)
 
-      
         UserGenres.objects.filter(userprofile=user_profile, genre_id__in=genres_to_remove).delete()
 
-       
         for genre_id in genres_to_add:
             genre = Genre.objects.get(id=genre_id)
             UserGenres.objects.create(userprofile=user_profile, genre=genre)
@@ -422,4 +417,3 @@ class UpdateUserGenresView(APIView):
             {"message": "Updated successfully."},
             status=status.HTTP_200_OK,
         )
-

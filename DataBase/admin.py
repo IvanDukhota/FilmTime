@@ -1,6 +1,12 @@
 from django.contrib import admin
 from .models import *
 
+from django.contrib import admin
+
+admin.site.site_header = "FilmTime Admin Page"
+admin.site.site_title = "FilmTime Admin Page"
+admin.site.index_title = "FilmTime Admin Page"
+
 
 # UserProfile Model
 class UserProfileAdmin(admin.ModelAdmin):
@@ -23,10 +29,24 @@ class UserAdmin(admin.ModelAdmin):
     ordering = ['email']
 
 
-# Subscription Model
-class SubscriptionAdmin(admin.ModelAdmin):
-    list_display = ('name', 'level', 'term_of_usage', 'purchase_date')
-    search_fields = ('name', 'level')
+# SubscriptionPlan Model
+class SubscriptionPlanAdmin(admin.ModelAdmin):
+    list_display = ('plan_type', 'price_per_month', 'duration_in_months', 'total_price')
+    search_fields = ('plan_type', 'description')
+    ordering = ('plan_type',)
+    list_filter = ('plan_type',)
+
+
+# UserSubscription Model
+class UserSubscriptionAdmin(admin.ModelAdmin):
+    list_display = ('user', 'plan', 'purchase_date', 'is_active', 'expiration_date')
+    search_fields = ('user__email', 'plan__plan_type')
+    list_filter = ('is_active', 'plan__plan_type')
+    ordering = ('-purchase_date',)
+
+    def expiration_date(self, obj):
+        return obj.expiration_date
+    expiration_date.short_description = 'Expiration Date'
 
 
 # Genre Model
@@ -129,7 +149,8 @@ class ContentListAdmin(admin.ModelAdmin):
 
 admin.site.register(UserProfile, UserProfileAdmin)
 admin.site.register(User, UserAdmin)
-admin.site.register(Subscription, SubscriptionAdmin)
+admin.site.register(SubscriptionPlan, SubscriptionPlanAdmin)
+admin.site.register(UserSubscription, UserSubscriptionAdmin)
 admin.site.register(Genre, GenreAdmin)
 admin.site.register(UserGenres, UserGenresAdmin)
 admin.site.register(Content, ContentAdmin)
