@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -16,14 +17,25 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.filmtime.api.UserProfile.UserProfileFetchContract;
+import com.filmtime.model.Genre;
 import com.filmtime.model.UserProfileResponse;
 import com.filmtime.ui.UserProfileDisplay;
 import com.filmtime.api.ApiStatus;
+import com.filmtime.ui.UserProfileListAdapter;
 import com.filmtime.util.JwtManager;
 import com.filmtime.model.UserProfileModel;
 import com.filmtime.util.Util;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class UserProfileActivity extends AppCompatActivity implements View.OnClickListener, UserProfileFetchContract {
+    private ExpandableListView expandableListView;
+    private List<String> expandableListTitle;
+    private HashMap<String, List<String>> expandableListDetail;
     private UserProfileModel userProfileModel;
     private UserProfileDisplay userProfileDisplay;
 
@@ -52,6 +64,10 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
         userProfileDisplay = new UserProfileDisplay(usernameTextView, emailTextView, bioTextView,
                 countryTextView, pfpImageView);
+
+        expandableListView = (ExpandableListView) findViewById(R.id.user_profile_expandable_list);
+        expandableListDetail = new HashMap<>();
+        expandableListTitle = new ArrayList<>();
     }
 
     @Override
@@ -67,6 +83,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             userProfileModel.fetchUserProfileData(this, this);
         }
         else {
+            fillUserPreferencesList(userProfileModel.getUserProfileData());
             userProfileDisplay.displayUserProfileData(userProfileModel.getUserProfileData());
         }
     }
@@ -82,6 +99,8 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                     Util.redirectToActivity(this, LoginActivity.class);
                 }
                 userProfileDisplay.displayUserProfileData(userProfileModel.getUserProfileData());
+
+                fillUserPreferencesList(userProfileModel.getUserProfileData());
                 break;
             }
             case FAILURE:
@@ -90,6 +109,17 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 break;
             }
         }
+    }
+
+    private void fillUserPreferencesList(UserProfileResponse userdata) {
+        List<String> genrePreferences = Arrays.stream(userdata.getGenres())
+                .map(Genre::getName)
+                .collect(Collectors.toList());
+        expandableListDetail.put("Preferences", genrePreferences);
+        expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
+        expandableListView.setAdapter(new UserProfileListAdapter(
+                this, expandableListTitle, expandableListDetail)
+        );
     }
 
     public void onClick(View v) {
