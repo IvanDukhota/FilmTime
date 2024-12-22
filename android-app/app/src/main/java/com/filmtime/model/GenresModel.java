@@ -6,7 +6,7 @@ import android.util.Log;
 import com.filmtime.api.ApiService;
 import com.filmtime.api.ApiStatus;
 import com.filmtime.api.AuthInterceptor;
-import com.filmtime.api.GenresFetchContract;
+import com.filmtime.api.Content.GenresFetchContract;
 import com.filmtime.api.RetrofitClient;
 
 import retrofit2.Call;

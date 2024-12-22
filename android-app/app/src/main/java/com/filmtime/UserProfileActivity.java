@@ -16,8 +16,11 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.filmtime.api.UserProfile.HistoryFetchContract;
 import com.filmtime.api.UserProfile.UserProfileFetchContract;
 import com.filmtime.model.Genre;
+import com.filmtime.model.UserContentInteraction;
+import com.filmtime.model.UserHistoryModel;
 import com.filmtime.model.UserProfileResponse;
 import com.filmtime.ui.UserProfileDisplay;
 import com.filmtime.api.ApiStatus;
@@ -32,10 +35,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class UserProfileActivity extends AppCompatActivity implements View.OnClickListener, UserProfileFetchContract {
+public class UserProfileActivity extends AppCompatActivity implements View.OnClickListener,
+        UserProfileFetchContract, HistoryFetchContract {
     private ExpandableListView expandableListView;
     private List<String> expandableListTitle;
     private HashMap<String, List<String>> expandableListDetail;
+    private UserHistoryModel userHistoryModel;
     private UserProfileModel userProfileModel;
     private UserProfileDisplay userProfileDisplay;
 
@@ -66,6 +71,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 countryTextView, pfpImageView);
 
         expandableListView = (ExpandableListView) findViewById(R.id.user_profile_expandable_list);
+        expandableListView.setDivider(null);
         expandableListDetail = new HashMap<>();
         expandableListTitle = new ArrayList<>();
     }
@@ -74,6 +80,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     protected void onStart() {
         super.onStart();
         getUserProfileData();
+        getUserHistory();
     }
 
     private void getUserProfileData() {
@@ -86,6 +93,11 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             fillUserPreferencesList(userProfileModel.getUserProfileData());
             userProfileDisplay.displayUserProfileData(userProfileModel.getUserProfileData());
         }
+    }
+
+    private void getUserHistory() {
+        userHistoryModel = new UserHistoryModel();
+        userHistoryModel.fetchHistory(this, this);
     }
 
     @Override
@@ -117,6 +129,34 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 .collect(Collectors.toList());
         expandableListDetail.put("Preferences", genrePreferences);
         expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
+        resetListAdapter();
+    }
+
+    @Override
+    public void onHistoryFetchResponse(ApiStatus status) {
+        switch (status) {
+            case RESPONSE_OK: {
+                fillUserHistoryList(userHistoryModel.getUserInteractions());
+                break;
+            }
+            case FAILURE:
+            case RESPONSE_ERR: {
+                Toast.makeText(this, "Error: failed to fetch user history.", Toast.LENGTH_SHORT).show();
+                break;
+            }
+        }
+    }
+
+    private void fillUserHistoryList(UserContentInteraction[] userHistory) {
+        List<String> historyData = Arrays.stream(userHistory)
+                .map(UserContentInteraction::getContent_title)
+                .collect(Collectors.toList());
+        expandableListDetail.put("History", historyData);
+        expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
+        resetListAdapter();
+    }
+
+    private void resetListAdapter() {
         expandableListView.setAdapter(new UserProfileListAdapter(
                 this, expandableListTitle, expandableListDetail)
         );

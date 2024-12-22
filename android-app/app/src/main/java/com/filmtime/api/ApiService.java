@@ -7,6 +7,7 @@ import com.filmtime.model.MessageResponse;
 import com.filmtime.model.PreferencesSaveRequest;
 import com.filmtime.model.RefreshTokenRequest;
 import com.filmtime.model.RegisterRequest;
+import com.filmtime.model.UserContentInteraction;
 import com.filmtime.model.UserProfileEditRequest;
 import com.filmtime.model.UserProfileEditResponse;
 import com.filmtime.model.UserProfileResponse;
@@ -39,4 +40,7 @@ public interface ApiService {
 
     @PUT("/api/v1/registration/update-user-genres/")
     Call<MessageResponse> putGenres(@Body PreferencesSaveRequest request);
+
+    @GET("/api/v1/user/history/")
+    Call<UserContentInteraction[]> getUserHistory();
 }

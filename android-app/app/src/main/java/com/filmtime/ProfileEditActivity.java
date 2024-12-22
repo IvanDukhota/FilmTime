@@ -20,8 +20,8 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.filmtime.api.GenresFetchContract;
-import com.filmtime.api.PreferencesSaveContract;
+import com.filmtime.api.Content.GenresFetchContract;
+import com.filmtime.api.UserProfile.PreferencesSaveContract;
 import com.filmtime.api.UserProfile.UserProfileEditContract;
 import com.filmtime.api.UserProfile.UserProfileFetchContract;
 import com.filmtime.model.Genre;
