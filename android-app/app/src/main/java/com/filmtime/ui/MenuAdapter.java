@@ -17,22 +17,22 @@ abstract public class MenuAdapter {
         menu.setOnItemSelectedListener(item -> {
             switch (item.getItemId()) {
                 case MOVIE: {
-                    Util.redirectToActivity(activity, MainActivity.class);
+                    if (!(activity instanceof MainActivity))
+                        Util.redirectToActivity(activity, MainActivity.class);
                     break;
                 }
                 case HISTORY: {
-                    Util.redirectToActivity(activity, HistoryActivity.class);
+                    if (!(activity instanceof HistoryActivity))
+                        Util.redirectToActivity(activity, HistoryActivity.class);
                     break;
                 }
                 case USER_PROFILE: {
-                    Util.redirectToActivity(activity, UserProfileActivity.class);
+                    if (!(activity instanceof UserProfileActivity))
+                        Util.redirectToActivity(activity, UserProfileActivity.class);
                     break;
                 }
             }
             return true;
-        });
-        menu.setOnItemReselectedListener(item -> {
-            return;
         });
     }
 }

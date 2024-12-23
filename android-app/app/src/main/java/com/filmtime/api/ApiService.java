@@ -9,7 +9,6 @@ import com.filmtime.model.PreferencesSaveRequest;
 import com.filmtime.model.RefreshTokenRequest;
 import com.filmtime.model.RegisterRequest;
 import com.filmtime.model.UserContentInteraction;
-import com.filmtime.model.UserProfileEditRequest;
 import com.filmtime.model.UserProfileEditResponse;
 import com.filmtime.model.UserProfileResponse;
 
@@ -24,6 +23,7 @@ import retrofit2.http.PATCH;
 import retrofit2.http.PUT;
 import retrofit2.http.Part;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface ApiService {
     @POST("/api/v1/registration/login/")
@@ -69,6 +69,6 @@ public interface ApiService {
     @GET("/api/v1/content/movie/{movie_id}")
     Call<ContentResponse> getContentDetails(@Path("movie_id") int movieId);
 
-    @GET("/api/v1/content/movies/filter/{params}")
-    Call<ContentResponse> getContent(@Path("params") String params);
+    @GET("/api/v1/content/movies/filter/")
+    Call<ContentResponse[]> getContent(@Query("title") String params);
 }

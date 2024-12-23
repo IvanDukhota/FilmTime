@@ -1,11 +1,9 @@
 package com.filmtime;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,16 +15,11 @@ import com.filmtime.api.ApiStatus;
 import com.filmtime.api.Content.ContentByIdContract;
 import com.filmtime.model.ContentModel;
 import com.filmtime.model.ContentResponse;
-import com.filmtime.model.Genre;
-import com.filmtime.model.UserProfileResponse;
 import com.filmtime.ui.MenuAdapter;
-import com.filmtime.util.Constants;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.squareup.picasso.Picasso;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 public class ContentPageActivity extends AppCompatActivity implements ContentByIdContract {
 

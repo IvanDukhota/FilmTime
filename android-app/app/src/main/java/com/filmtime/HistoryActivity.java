@@ -34,7 +34,6 @@ import java.util.HashMap;
 
 public class HistoryActivity extends AppCompatActivity implements HistoryFetchContract {
 
-    HashMap<Integer, UserContentInteraction> historyMap;
     UserHistoryModel userHistoryModel;
 
     @Override
@@ -48,7 +47,6 @@ public class HistoryActivity extends AppCompatActivity implements HistoryFetchCo
             return insets;
         });
 
-        historyMap = new HashMap<>();
         userHistoryModel = new UserHistoryModel();
         userHistoryModel.fetchHistory(this, this);
 
@@ -81,8 +79,6 @@ public class HistoryActivity extends AppCompatActivity implements HistoryFetchCo
         }
 
         for (UserContentInteraction interaction : history) {
-            historyMap.put(interaction.getContent_id(), interaction);
-
             TextView historyView = new TextView(new ContextThemeWrapper(this, R.style.HistoryButtonStyle));
             historyView.setId(View.generateViewId());
             historyView.setText(interaction.getContent_title());
