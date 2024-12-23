@@ -1,6 +1,13 @@
 package com.filmtime;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.View;
@@ -13,6 +20,11 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.helper.widget.Flow;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -33,6 +45,8 @@ import com.filmtime.api.ApiStatus;
 import com.filmtime.model.UserProfileModel;
 import com.filmtime.util.Util;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -53,6 +67,7 @@ public class ProfileEditActivity extends AppCompatActivity implements View.OnCli
     private EditText bioEditText;
     private ImageView pfpImageView;
     private HashMap<Integer, ToggleButton> genreButtons;
+    private byte[] pfpImageData;
     private boolean changePassword;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +84,8 @@ public class ProfileEditActivity extends AppCompatActivity implements View.OnCli
         cancelButton.setOnClickListener(this);
         Button saveButton = (Button) findViewById(R.id.buttonSaveEdited);
         saveButton.setOnClickListener(this);
+        Button pickImage = (Button) findViewById(R.id.ButtonPfpEdit);
+        pickImage.setOnClickListener(this);
 
         emailTextView = (TextView) findViewById(R.id.emailTextView);
         passwordEditText = (EditText) findViewById(R.id.editTextPassword);
@@ -192,17 +209,48 @@ public class ProfileEditActivity extends AppCompatActivity implements View.OnCli
                 PreferencesModel preferencesModel = new PreferencesModel();
                 preferencesModel.putUserPreferences(this, this, getSelectedGenreIds());
 
+                if (pfpImageData == null) {
+                    pfpImageData = serializeBitmapToBytes(((BitmapDrawable)pfpImageView.getDrawable()).getBitmap());
+                }
+
                 UserProfileEditRequest request = new UserProfileEditRequest(usernameEditText.getText().toString(),
                         countryEditText.getText().toString(),
                         bioEditText.getText().toString(),
-                        null, null);
+                        pfpImageData, null);
                 if (changePassword)
                     request.setPassword(passwordEditText.getText().toString());
 
                 userProfileModel.editUserProfileData(this, this, request);
                 break;
             }
+            case R.id.ButtonPfpEdit: {
+                Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+
+                startActivityForResult(intent, 1);
+                break;
+            }
         }
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1 && resultCode == RESULT_OK && data != null) {
+            Uri imageUri = data.getData();
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
+                pfpImageView.setImageBitmap(bitmap);
+
+                pfpImageData = serializeBitmapToBytes(bitmap);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private byte[] serializeBitmapToBytes(Bitmap bitmap) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+        return byteArrayOutputStream.toByteArray();
     }
 
     private int[] getSelectedGenreIds() {

@@ -11,6 +11,9 @@ import com.filmtime.api.ApiStatus;
 import com.filmtime.api.AuthInterceptor;
 import com.filmtime.api.RetrofitClient;
 
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -67,8 +70,13 @@ public class UserProfileModel {
 
     public void editUserProfileData(Context context, UserProfileEditContract consumer,
                                     UserProfileEditRequest userProfileEditRequest) {
+        RequestBody username = createPartFromString(userProfileEditRequest.getUsername());
+        RequestBody country = createPartFromString(userProfileEditRequest.getCountry());
+        RequestBody bio = createPartFromString(userProfileEditRequest.getBio());
+        MultipartBody.Part profile_picture = createImagePart("profile_picture", userProfileEditRequest.getProfilePicture());
+
         ApiService apiService = RetrofitClient.getInstance(new AuthInterceptor(context)).create(ApiService.class);
-        apiService.editUserProfile(userProfileEditRequest).enqueue(new Callback<UserProfileEditResponse>() {
+        Callback<UserProfileEditResponse> callback = new Callback<UserProfileEditResponse>() {
             @Override
             public void onResponse(Call<UserProfileEditResponse> call, Response<UserProfileEditResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -88,6 +96,21 @@ public class UserProfileModel {
                 t.printStackTrace();
                 consumer.onUserProfileEditResponse(ApiStatus.FAILURE);
             }
-        });
+        };
+
+        if (userProfileEditRequest.getPassword() == null) {
+            apiService.editUserProfile(username, country, bio, profile_picture).enqueue(callback);
+        }
+        else {
+            RequestBody password = createPartFromString(userProfileEditRequest.getPassword());
+            apiService.editUserProfile(password, username, country, bio, profile_picture).enqueue(callback);
+        }
     }
-}
+
+    private static MultipartBody.Part createImagePart(String partName, byte[] imageBytes) {
+        RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), imageBytes);
+        return MultipartBody.Part.createFormData(partName, "profile_picture.png", requestFile);
+    }
+    private RequestBody createPartFromString(String value) {
+        return RequestBody.create(MediaType.parse("text/plain"), value);
+    }}

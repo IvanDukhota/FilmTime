@@ -12,12 +12,16 @@ import com.filmtime.model.UserProfileEditRequest;
 import com.filmtime.model.UserProfileEditResponse;
 import com.filmtime.model.UserProfileResponse;
 
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.PATCH;
 import retrofit2.http.PUT;
+import retrofit2.http.Part;
 
 public interface ApiService {
     @POST("/api/v1/registration/login/")
@@ -29,8 +33,24 @@ public interface ApiService {
     @GET("/api/v1/registration/user/profile/")
     Call<UserProfileResponse> getUserProfile();
 
+    @Multipart
     @PATCH("/api/v1/registration/user/profile/edit/")
-    Call<UserProfileEditResponse> editUserProfile(@Body UserProfileEditRequest userProfileEditRequest);
+    Call<UserProfileEditResponse> editUserProfile(
+            @Part("password") RequestBody password,
+            @Part("username") RequestBody username,
+            @Part("country") RequestBody country,
+            @Part("bio") RequestBody bio,
+            @Part MultipartBody.Part profile_picture
+    );
+
+    @Multipart
+    @PATCH("/api/v1/registration/user/profile/edit/")
+    Call<UserProfileEditResponse> editUserProfile(
+            @Part("username") RequestBody username,
+            @Part("country") RequestBody country,
+            @Part("bio") RequestBody bio,
+            @Part MultipartBody.Part profile_picture
+    );
 
     @POST("/api/v1/registration/token/refresh/")
     Call<LoginResponse> refreshToken(@Body RefreshTokenRequest refresh);

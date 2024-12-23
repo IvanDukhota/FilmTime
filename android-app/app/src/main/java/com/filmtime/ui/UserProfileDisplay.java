@@ -4,6 +4,10 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.filmtime.R;
+import com.filmtime.util.Constants;
+import com.squareup.picasso.Picasso;
+
 import com.filmtime.model.UserProfileResponse;
 
 public class UserProfileDisplay {
@@ -29,7 +33,11 @@ public class UserProfileDisplay {
             bioTextView.setText(userProfileData.getBio());
             countryTextView.setText(userProfileData.getCountry());
 
-            //TODO: reimplement image fetching
+            Picasso.get()
+                    .load(Constants.SERVER_URL + userProfileData.getProfilePicture())
+                    .placeholder(R.drawable.account)
+                    .error(R.drawable.account)
+                    .into(pfpImageView);
         }
         catch (NullPointerException ex) {
             Log.e("PROFILE_EX", ex.getMessage());
