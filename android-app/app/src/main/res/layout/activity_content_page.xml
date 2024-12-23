@@ -1,118 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/main"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/main_background"
-    android:padding="16dp">
+    android:id="@+id/main"
+    tools:context=".ContentPageActivity">
 
-    <LinearLayout
+    <ScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <!-- Постер фильма -->
-        <ImageView
-            android:id="@+id/movie_poster"
-            android:layout_width="match_parent"
-            android:layout_height="250dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/poster"
-            android:layout_marginBottom="16dp" />
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="parent"
+        android:padding="16dp"
+        app:layout_constraintStart_toStartOf="parent">
 
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:orientation="horizontal">
-            <!-- Название фильма -->
-            <TextView
-                android:id="@+id/movie_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/movie_poster"
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                android:scaleType="fitCenter"
+                android:layout_marginBottom="16dp" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:orientation="horizontal">
+                <TextView
+                    android:id="@+id/movie_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="30dp"
+                    android:textStyle="bold"
+                    android:textColor="#FFFFFF"
+                    android:layout_marginBottom="8dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Shutter Island"
-                android:textSize="30dp"
-                android:textStyle="bold"
-                android:textColor="#FFFFFF"
-                android:layout_marginBottom="8dp" />
+                android:orientation="vertical"
+                android:layout_marginBottom="16dp">
 
-            <!-- Иконка сохранения -->
-            <ImageButton
-                android:id="@+id/save_movie_button"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_gravity="end"
-                android:background="@null"
-                android:contentDescription="Save Movie"
-                android:src="@drawable/save_icon_adapted" />
+                <TextView
+                    android:id="@+id/movie_year"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Year:"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18dp"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:id="@+id/movie_genre"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Genre:"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18dp"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:id="@+id/movie_creators"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Creators:"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18dp"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:id="@+id/movie_starring"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Starring:"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18dp" />
+            </LinearLayout>
 
         </LinearLayout>
-
-        <!-- Информация о фильме -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginBottom="16dp">
-
-            <TextView
-                android:id="@+id/movie_year"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Year: 2010"
-                android:textColor="#FFFFFF"
-                android:textSize="18dp"
-                android:layout_marginBottom="4dp" />
-
-            <TextView
-                android:id="@+id/movie_duration"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Duration: 138 min"
-                android:textColor="#FFFFFF"
-                android:textSize="18dp"
-                android:layout_marginBottom="4dp" />
-
-            <TextView
-                android:id="@+id/movie_genre"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Genre: Thriller, Mystery"
-                android:textColor="#FFFFFF"
-                android:textSize="18dp"
-                android:layout_marginBottom="4dp" />
-
-            <TextView
-                android:id="@+id/movie_creators"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Creators: Martin Scorsese"
-                android:textColor="#FFFFFF"
-                android:textSize="18dp"
-                android:layout_marginBottom="4dp" />
-
-            <TextView
-                android:id="@+id/movie_starring"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Starring: Leonardo DiCaprio, Mark Ruffalo"
-                android:textColor="#FFFFFF"
-                android:textSize="18dp" />
-        </LinearLayout>
-
-        <!-- Кнопка трейлера -->
-        <Button
-            android:id="@+id/play_trailer_button"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:background="@drawable/button_background"
-            android:text="Play Trailer"
-            android:textColor="@color/white"
-            android:textSize="18dp"
-            android:drawableStart="@drawable/play_icon_adapted"
-            android:padding="12dp"
-            android:drawablePadding="8dp"
-            android:layout_marginBottom="16dp" />
-
-    </LinearLayout>
-</ScrollView>
+    </ScrollView>
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigationView"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:itemIconTint="@drawable/menu_item_color"
+        app:itemTextColor="@drawable/menu_item_color"
+        app:menu="@menu/bottom_nav_menu"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

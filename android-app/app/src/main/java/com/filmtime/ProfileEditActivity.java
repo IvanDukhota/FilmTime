@@ -40,10 +40,12 @@ import com.filmtime.model.Genre;
 import com.filmtime.model.GenresModel;
 import com.filmtime.model.PreferencesModel;
 import com.filmtime.model.UserProfileEditRequest;
+import com.filmtime.ui.MenuAdapter;
 import com.filmtime.ui.UserProfileDisplay;
 import com.filmtime.api.ApiStatus;
 import com.filmtime.model.UserProfileModel;
 import com.filmtime.util.Util;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -109,6 +111,10 @@ public class ProfileEditActivity extends AppCompatActivity implements View.OnCli
         else {
             userProfileDisplay.displayUserProfileData(userProfileModel.getUserProfileData());
         }
+
+        BottomNavigationView menu = findViewById(R.id.bottomNavigationView);
+        menu.setSelectedItemId(R.id.user_profile);
+        MenuAdapter.initMenu(this, menu);
     }
 
     private void createGenreButtons() {

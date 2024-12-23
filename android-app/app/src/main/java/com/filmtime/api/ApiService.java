@@ -1,5 +1,6 @@
 package com.filmtime.api;
 
+import com.filmtime.model.ContentResponse;
 import com.filmtime.model.Genre;
 import com.filmtime.model.LoginRequest;
 import com.filmtime.model.LoginResponse;
@@ -22,6 +23,7 @@ import retrofit2.http.POST;
 import retrofit2.http.PATCH;
 import retrofit2.http.PUT;
 import retrofit2.http.Part;
+import retrofit2.http.Path;
 
 public interface ApiService {
     @POST("/api/v1/registration/login/")
@@ -63,4 +65,10 @@ public interface ApiService {
 
     @GET("/api/v1/user/history/")
     Call<UserContentInteraction[]> getUserHistory();
+
+    @GET("/api/v1/content/movie/{movie_id}")
+    Call<ContentResponse> getContentDetails(@Path("movie_id") int movieId);
+
+    @GET("/api/v1/content/movies/filter/{params}")
+    Call<ContentResponse> getContent(@Path("params") String params);
 }

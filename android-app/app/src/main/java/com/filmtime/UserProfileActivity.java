@@ -22,12 +22,14 @@ import com.filmtime.model.Genre;
 import com.filmtime.model.UserContentInteraction;
 import com.filmtime.model.UserHistoryModel;
 import com.filmtime.model.UserProfileResponse;
+import com.filmtime.ui.MenuAdapter;
 import com.filmtime.ui.UserProfileDisplay;
 import com.filmtime.api.ApiStatus;
 import com.filmtime.ui.UserProfileListAdapter;
 import com.filmtime.util.JwtManager;
 import com.filmtime.model.UserProfileModel;
 import com.filmtime.util.Util;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,6 +76,10 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         expandableListView.setDivider(null);
         expandableListDetail = new HashMap<>();
         expandableListTitle = new ArrayList<>();
+
+        BottomNavigationView menu = findViewById(R.id.bottomNavigationView);
+        menu.setSelectedItemId(R.id.user_profile);
+        MenuAdapter.initMenu(this, menu);
     }
 
     @Override

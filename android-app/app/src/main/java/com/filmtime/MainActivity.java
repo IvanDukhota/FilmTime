@@ -12,9 +12,11 @@ import androidx.core.view.WindowInsetsCompat;
 import com.filmtime.api.ApiStatus;
 import com.filmtime.api.UserProfile.UserProfileFetchContract;
 import com.filmtime.model.UserProfileResponse;
+import com.filmtime.ui.MenuAdapter;
 import com.filmtime.util.JwtManager;
 import com.filmtime.model.UserProfileModel;
 import com.filmtime.util.Util;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity implements UserProfileFetchContract {
     private UserProfileModel userProfileModel;
@@ -29,6 +31,10 @@ public class MainActivity extends AppCompatActivity implements UserProfileFetchC
             return insets;
         });
         loginWithStoredToken();
+
+        BottomNavigationView menu = findViewById(R.id.bottomNavigationView);
+        menu.setSelectedItemId(R.id.movie);
+        MenuAdapter.initMenu(this, menu);
     }
     private void loginWithStoredToken() {
         JwtManager jwtManager = new JwtManager(this);
